@@ -18,6 +18,7 @@ Last verified:
 - Happy path Spark job is implemented.
 - Happy path data generation and EMR step submission helpers are implemented.
 - Investigation context export is implemented with deploy mode, job state, and best-effort YARN application ID extraction.
+- Long-running data, resource, and DB delay scenario jobs are implemented.
 - Local verification passed; the job has not been submitted to a live EMR cluster in this session.
 - Scenario folder structure and expected findings placeholders exist.
 - Repo contains no production MCP server implementation or MCP deployment infrastructure.

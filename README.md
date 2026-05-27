@@ -75,6 +75,16 @@ Export the Harrier investigation context:
 
 The exporter preserves cluster ID, step ID, deploy mode, job state, region, S3 paths, and time window. When EMR step logs are available in S3, it also tries to extract the YARN application ID.
 
+Long-running delay demos can be submitted the same way:
+
+```bash
+./scripts/run_scenario.sh long_running_data_delay
+./scripts/run_scenario.sh long_running_resource_delay
+DB_SECRET_ID=<secret-id> ./scripts/run_scenario.sh long_running_db_delay
+```
+
+These runs keep the EMR step in a running window so Harrier can investigate delay before failure.
+
 ## Destroy
 
 ```bash

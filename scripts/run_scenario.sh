@@ -10,7 +10,7 @@ fi
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 
 case "$scenario" in
-  happy_path)
+  happy_path | long_running_data_delay | long_running_resource_delay | long_running_db_delay)
     SCENARIO="$scenario" "$repo_root/scripts/submit_step.sh"
     ;;
   *)

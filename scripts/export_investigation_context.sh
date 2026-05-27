@@ -181,6 +181,7 @@ payload = {
     "log_uri": context.get("log_uri"),
     "input_path": context.get("input_path"),
     "output_path": context.get("output_path"),
+    "diagnostic_signals": context.get("diagnostic_signals"),
     "expected_outcome": context.get("expected_outcome", "success"),
     "aws_step_status": status.get("State"),
 }

@@ -181,9 +181,9 @@ Scenario-specific tasks:
 
 - [ ] `data_skew`: generate skewed keys and long-tail task evidence.
 - [ ] `shuffle_spill`: generate heavy shuffle/spill evidence.
-- [ ] `long_running_data_delay`: leave a Spark job running long enough to show active stage/task skew, spill, or oversized partition evidence before failure.
-- [ ] `long_running_resource_delay`: leave a Spark job running with pending containers, saturated executors, or cluster capacity pressure before failure.
-- [ ] `long_running_db_delay`: leave a Spark/JDBC job running while read-only DB diagnostics show active query wait, bad plan, or large scan/join delay.
+- [x] `long_running_data_delay`: leave a Spark job running long enough to show active stage/task skew, spill, or oversized partition evidence before failure.
+- [x] `long_running_resource_delay`: leave a Spark job running with pending containers, saturated executors, or cluster capacity pressure before failure.
+- [x] `long_running_db_delay`: leave a Spark/JDBC job running while read-only DB diagnostics show active query wait, bad plan, or large scan/join delay.
 - [ ] `kms_access_denied`: configure demo KMS denial safely.
 - [ ] `hdfs_full`: simulate storage pressure safely.
 - [ ] `db_connection_failure`: enable optional PostgreSQL demo path.

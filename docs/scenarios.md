@@ -70,6 +70,12 @@ These scenarios are investigated while the EMR step or YARN application is still
 
 Simulates a job that is still running because one stage or a small set of tasks is processing disproportionate data.
 
+Run:
+
+```bash
+HOT_PARTITION_SLEEP_SECONDS=900 ./scripts/run_scenario.sh long_running_data_delay
+```
+
 Expected evidence:
 
 - EMR step and YARN application are still `RUNNING`.
@@ -85,6 +91,12 @@ Expected recommendation:
 
 Simulates a job that is still running because the cluster cannot provide enough resources.
 
+Run:
+
+```bash
+EXECUTOR_INSTANCES=20 EXECUTOR_MEMORY=4g ./scripts/run_scenario.sh long_running_resource_delay
+```
+
 Expected evidence:
 
 - EMR step and YARN application are still `RUNNING` or `ACCEPTED`.
@@ -99,6 +111,14 @@ Expected recommendation:
 ### `long_running_db_delay`
 
 Simulates a Spark/JDBC job that is still running because database-side work is slow.
+
+Run:
+
+```bash
+DB_SECRET_ID=<secret-id> DB_SLEEP_SECONDS=900 ./scripts/run_scenario.sh long_running_db_delay
+```
+
+The secret should contain `jdbc_url`, `username`, and `password`. The job uses Secrets Manager so the demo does not put the database password in the EMR step arguments.
 
 Expected evidence:
 
