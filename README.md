@@ -6,6 +6,8 @@ It owns demo infrastructure, Spark jobs, sample data, scenario runners, expected
 
 The production MCP server and AWS DevOps Agent registration assets live in `harrier-emr-mcp`.
 
+Track current build state in [PROGRESS.md](PROGRESS.md).
+
 ## Drop 1 Demo Scope
 
 - Amazon EMR on EC2
@@ -26,4 +28,3 @@ Defaults to implement in Terraform:
 - CloudWatch log retention
 - Optional cost alarm or AWS Budget setup
 - Cleanup scripts per scenario
-
