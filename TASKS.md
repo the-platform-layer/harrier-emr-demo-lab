@@ -155,6 +155,8 @@ Scenarios:
 - `hdfs_full`
 - `db_connection_failure`
 - `db_lock_timeout`
+- `db_partition_hotspot`
+- `db_large_join_spill`
 - `livy_session_failure`
 
 Tasks for each scenario:
@@ -175,7 +177,17 @@ Scenario-specific tasks:
 - [ ] `hdfs_full`: simulate storage pressure safely.
 - [ ] `db_connection_failure`: enable optional PostgreSQL demo path.
 - [ ] `db_lock_timeout`: add safe lock simulator.
+- [ ] `db_partition_hotspot`: simulate poor JDBC partitioning over large DB chunks.
+- [ ] `db_large_join_spill`: simulate expensive large join / missing index diagnostics.
 - [ ] `livy_session_failure`: produce Livy session failure evidence.
+
+DB performance scenario tasks:
+
+- [ ] Add seed data large enough to make partitioning/join behavior visible but still demo-safe.
+- [ ] Add PostgreSQL diagnostic SQL for read-only troubleshooting.
+- [ ] Add optional migration SQL examples for recommended fixes.
+- [ ] Add rollback SQL examples where applicable.
+- [ ] Ensure MCP recommendations are PR suggestions only and never direct DB changes.
 
 Done when:
 

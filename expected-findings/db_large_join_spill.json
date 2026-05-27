@@ -1,0 +1,6 @@
+{
+  "root_cause_category": "DB_LARGE_JOIN_SPILL",
+  "recommendation_type": "DB",
+  "pr_ready": true
+}
+

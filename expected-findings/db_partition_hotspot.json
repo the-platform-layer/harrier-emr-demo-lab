@@ -1,0 +1,6 @@
+{
+  "root_cause_category": "DB_PARTITION_HOTSPOT",
+  "recommendation_type": "DB",
+  "pr_ready": true
+}
+
