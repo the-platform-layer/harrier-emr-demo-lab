@@ -1,4 +1,16 @@
 {
-  "root_cause_category": "DRIVER_OOM"
+  "scenario": "driver_oom",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DRIVER_OOM",
+  "recommendation_type": "SPARK_CONFIG",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Driver or controller log contains driver OutOfMemoryError evidence",
+    "Driver result collection pattern is visible in the job log",
+    "Run context uses client deploy mode unless overridden"
+  ],
+  "expected_recommendations": [
+    "Avoid collecting large datasets to the driver",
+    "Increase driver memory or max result size only when the code path is justified"
+  ]
 }
-

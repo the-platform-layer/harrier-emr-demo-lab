@@ -1,6 +1,20 @@
 {
-  "root_cause_category": "MEMORY_OVERHEAD",
+  "scenario": "executor_oom",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "EXECUTOR_OOM",
+  "acceptable_related_categories": [
+    "MEMORY_OVERHEAD",
+    "EXECUTOR_LOST"
+  ],
   "recommendation_type": "SPARK_CONFIG",
-  "pr_ready": true
+  "pr_ready": true,
+  "expected_evidence": [
+    "Executor or YARN container log contains OutOfMemoryError or physical memory exceeded",
+    "Container or executor failure is visible in archived EMR logs",
+    "Diagnostic signal mentions executor memory allocation pressure"
+  ],
+  "expected_recommendations": [
+    "Adjust executor memory, memory overhead, cores, or partition size",
+    "Review collect, cache, broadcast, and wide transformation memory pressure"
+  ]
 }
-

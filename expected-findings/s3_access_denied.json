@@ -1,6 +1,16 @@
 {
-  "root_cause_category": "S3_ACCESS_DENIED",
+  "scenario": "s3_access_denied",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "S3_ACCESS_DENIED",
   "recommendation_type": "IAM",
-  "pr_ready": true
+  "pr_ready": true,
+  "expected_evidence": [
+    "Driver or executor log contains AccessDenied while reading a demo S3 path",
+    "The denied path is included as the run input path",
+    "No shared bucket policy or production IAM resource is changed"
+  ],
+  "expected_recommendations": [
+    "Grant the EMR EC2 instance profile least-privilege access to the required demo prefix",
+    "Validate bucket policy, object ownership, and encryption requirements"
+  ]
 }
-

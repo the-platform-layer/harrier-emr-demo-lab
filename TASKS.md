@@ -103,7 +103,7 @@ Done when:
 
 ## Slice 10: Demo Scenarios Batch 1
 
-Status: Not started
+Status: Implemented
 
 Goal: implement the first five controlled failure scenarios.
 
@@ -117,32 +117,32 @@ Scenarios:
 
 Tasks for each scenario:
 
-- [ ] Implement PySpark job.
-- [ ] Add scenario config if needed.
-- [ ] Mark each scenario with intended Spark deploy mode.
-- [ ] Add `run_scenario.sh` entry.
-- [ ] Add expected finding JSON.
-- [ ] Add cleanup behavior.
-- [ ] Document how to run.
-- [ ] Document expected Harrier result.
-- [ ] Keep data and permissions isolated to demo resources.
+- [x] Implement PySpark job.
+- [x] Add scenario config if needed.
+- [x] Mark each scenario with intended Spark deploy mode.
+- [x] Add `run_scenario.sh` entry.
+- [x] Add expected finding JSON.
+- [x] Add cleanup behavior.
+- [x] Document how to run.
+- [x] Document expected Harrier result.
+- [x] Keep data and permissions isolated to demo resources.
 
 Scenario-specific tasks:
 
-- [ ] `executor_oom`: produce YARN/container memory kill evidence.
-- [ ] `driver_oom`: produce driver memory/code-pattern evidence.
-- [ ] `missing_dependency`: produce missing Python/JVM dependency evidence.
-- [ ] `s3_access_denied`: produce S3 AccessDenied evidence with demo-only path.
-- [ ] `bad_input_data`: produce corrupt/schema mismatch evidence.
+- [x] `executor_oom`: produce YARN/container memory kill evidence.
+- [x] `driver_oom`: produce driver memory/code-pattern evidence.
+- [x] `missing_dependency`: produce missing Python/JVM dependency evidence.
+- [x] `s3_access_denied`: produce S3 AccessDenied evidence with demo-only path.
+- [x] `bad_input_data`: produce corrupt/schema mismatch evidence.
 
 Done when:
 
-- [ ] Each scenario is runnable.
-- [ ] Each scenario creates expected logs.
-- [ ] Batch 1 includes at least one client-mode and one cluster-mode log layout.
-- [ ] Each scenario has expected finding JSON.
-- [ ] Cleanup restores demo state.
-- [ ] Harrier can detect each scenario through normal investigation context.
+- [x] Each scenario is runnable.
+- [x] Each scenario creates expected logs.
+- [x] Batch 1 includes at least one client-mode and one cluster-mode log layout.
+- [x] Each scenario has expected finding JSON.
+- [x] Cleanup restores demo state.
+- [x] Harrier can detect each scenario through normal investigation context.
 
 ## Slice 14: Demo Scenarios Batch 2
 

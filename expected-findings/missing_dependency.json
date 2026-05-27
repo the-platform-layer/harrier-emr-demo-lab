@@ -1,6 +1,16 @@
 {
-  "root_cause_category": "DEPENDENCY_MISSING",
+  "scenario": "missing_dependency",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DEPENDENCY_MISSING",
   "recommendation_type": "DEPENDENCY",
-  "pr_ready": true
+  "pr_ready": true,
+  "expected_evidence": [
+    "Driver log contains ModuleNotFoundError or no module named",
+    "The missing module name is included in the scenario diagnostic signal",
+    "Run context uses client deploy mode unless overridden"
+  ],
+  "expected_recommendations": [
+    "Package the missing Python module with the Spark job",
+    "Add the dependency to the job requirements or EMR bootstrap path"
+  ]
 }
-

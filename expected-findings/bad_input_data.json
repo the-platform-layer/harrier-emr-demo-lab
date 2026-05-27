@@ -1,4 +1,16 @@
 {
-  "root_cause_category": "BAD_INPUT_DATA"
+  "scenario": "bad_input_data",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "BAD_INPUT_DATA",
+  "recommendation_type": "CODE",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Generated input CSV contains invalid numeric and timestamp fields",
+    "Spark log contains CSV malformed or schema mismatch evidence",
+    "Bad records are isolated under the demo raw bucket input prefix"
+  ],
+  "expected_recommendations": [
+    "Add schema validation and quarantine for malformed records",
+    "Fix upstream input generation or parsing assumptions before re-running"
+  ]
 }
-

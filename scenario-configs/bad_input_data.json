@@ -1,0 +1,20 @@
+{
+  "scenario": "bad_input_data",
+  "slice": 10,
+  "job": "spark-jobs/bad_input_data/job.py",
+  "intended_deploy_mode": "cluster",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "BAD_INPUT_DATA",
+  "cleanup_scope": [
+    "generated malformed input file",
+    "uploaded input object",
+    "uploaded job object",
+    "scenario output prefix",
+    "run context"
+  ],
+  "safety": [
+    "writes malformed input only under demo raw bucket",
+    "uses scenario-specific processed output prefix",
+    "does not mutate IAM or shared data"
+  ]
+}

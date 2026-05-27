@@ -46,6 +46,91 @@ Expected Harrier result:
 - No root-cause finding.
 - Evidence confirms the cluster, step, S3 paths, and logs are reachable.
 
+## Slice 10 Failure Scenarios
+
+Run any batch 1 scenario through the same runner:
+
+```bash
+./scripts/run_scenario.sh executor_oom
+./scripts/run_scenario.sh driver_oom
+./scripts/run_scenario.sh missing_dependency
+./scripts/run_scenario.sh s3_access_denied
+./scripts/run_scenario.sh bad_input_data
+```
+
+`driver_oom` and `missing_dependency` default to client deploy mode so the demo covers client-side driver log layout. `executor_oom`, `s3_access_denied`, and `bad_input_data` default to cluster deploy mode so the demo covers YARN/container log layout. Set `DEPLOY_MODE=client` or `DEPLOY_MODE=cluster` to override either default.
+
+Clean up a run with:
+
+```bash
+./scripts/cleanup_scenario.sh <scenario>
+```
+
+### `executor_oom`
+
+Simulates executor/container memory pressure with bounded allocation defaults and a classifier-friendly YARN memory signal.
+
+Expected evidence:
+
+- Executor or container logs include `java.lang.OutOfMemoryError` and YARN physical-memory wording.
+- Run context diagnostic signals identify `EXECUTOR_OOM`.
+
+Expected recommendation:
+
+- Tune executor memory, memory overhead, cores, partition size, cache use, and wide transformations.
+
+### `driver_oom`
+
+Simulates driver-side memory pressure from collecting an oversized result to the driver.
+
+Expected evidence:
+
+- Driver or controller logs include driver OOM wording and a collect-pattern marker.
+- Run context records client deploy mode unless explicitly overridden.
+
+Expected recommendation:
+
+- Remove large driver collects, write distributed outputs, or tune driver memory only after the code path is reviewed.
+
+### `missing_dependency`
+
+Starts Spark and imports a deliberately absent Python module.
+
+Expected evidence:
+
+- Driver logs contain `ModuleNotFoundError` or `No module named`.
+- The missing module name is captured in the run context diagnostic signals.
+
+Expected recommendation:
+
+- Package the missing dependency with the job or add it to the EMR/bootstrap dependency path.
+
+### `s3_access_denied`
+
+Raises an S3 403-style failure against a demo-only path without changing shared IAM policy by default.
+
+Expected evidence:
+
+- Logs contain `AccessDenied while reading s3://...`.
+- The denied S3 URI is present as the input path in exported context.
+
+Expected recommendation:
+
+- Review instance-profile permissions, bucket policy, object ownership, and encryption requirements for the specific prefix.
+
+### `bad_input_data`
+
+Uploads malformed demo CSV input and fails when schema validation finds invalid amount or timestamp fields.
+
+Expected evidence:
+
+- Spark logs contain `CSV malformed` or `schema mismatch`.
+- Bad records live only under the demo raw bucket input prefix.
+
+Expected recommendation:
+
+- Add validation/quarantine handling and fix upstream parsing or input generation assumptions.
+
 Advanced scenarios:
 
 - `data_skew`

@@ -85,6 +85,18 @@ DB_SECRET_ID=<secret-id> ./scripts/run_scenario.sh long_running_db_delay
 
 These runs keep the EMR step in a running window so Harrier can investigate delay before failure.
 
+Slice 10 controlled failure demos:
+
+```bash
+./scripts/run_scenario.sh executor_oom
+./scripts/run_scenario.sh driver_oom
+./scripts/run_scenario.sh missing_dependency
+./scripts/run_scenario.sh s3_access_denied
+./scripts/run_scenario.sh bad_input_data
+```
+
+The runner writes context to `.harrier-demo/last-context.json` for each run. Use `./scripts/cleanup_scenario.sh <scenario>` to remove demo S3 artifacts and cancel an active step when possible.
+
 ## Destroy
 
 ```bash
