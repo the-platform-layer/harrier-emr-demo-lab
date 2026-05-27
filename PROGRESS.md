@@ -2,6 +2,8 @@
 
 Use this file as the handoff point between chats, sessions, and contributors.
 
+Detailed implementation checklists live in [TASKS.md](TASKS.md).
+
 ## Current State
 
 Status: Slice 0 scaffold complete.
@@ -82,4 +84,3 @@ cd /Users/pinakimukherjee/Documents/Workspace/harrier-emr-demo-lab
 python3 -m compileall scripts spark-jobs db
 find . -maxdepth 3 -type f | sort
 ```
-

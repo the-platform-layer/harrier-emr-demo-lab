@@ -8,6 +8,8 @@ The production MCP server and AWS DevOps Agent registration assets live in `harr
 
 Track current build state in [PROGRESS.md](PROGRESS.md).
 
+Track slice implementation tasks in [TASKS.md](TASKS.md).
+
 ## Drop 1 Demo Scope
 
 - Amazon EMR on EC2
