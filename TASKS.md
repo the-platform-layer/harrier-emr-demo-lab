@@ -87,6 +87,7 @@ Tasks:
 - [ ] Implement `scripts/export_investigation_context.sh`.
 - [ ] Extract cluster ID.
 - [ ] Extract step ID.
+- [ ] Export `deploy_mode` as `client`, `cluster`, or `unknown`.
 - [ ] Extract YARN application ID where available.
 - [ ] Export region and time window.
 - [ ] Update `docs/demo-overview.md`.
@@ -118,6 +119,7 @@ Tasks for each scenario:
 
 - [ ] Implement PySpark job.
 - [ ] Add scenario config if needed.
+- [ ] Mark each scenario with intended Spark deploy mode.
 - [ ] Add `run_scenario.sh` entry.
 - [ ] Add expected finding JSON.
 - [ ] Add cleanup behavior.
@@ -137,6 +139,7 @@ Done when:
 
 - [ ] Each scenario is runnable.
 - [ ] Each scenario creates expected logs.
+- [ ] Batch 1 includes at least one client-mode and one cluster-mode log layout.
 - [ ] Each scenario has expected finding JSON.
 - [ ] Cleanup restores demo state.
 - [ ] Harrier can detect each scenario through normal investigation context.
@@ -164,6 +167,7 @@ Tasks for each scenario:
 
 - [ ] Implement job or simulator.
 - [ ] Add scenario config if needed.
+- [ ] Mark each scenario with intended Spark deploy mode.
 - [ ] Add `run_scenario.sh` entry.
 - [ ] Add expected finding JSON.
 - [ ] Add cleanup behavior.
@@ -195,6 +199,7 @@ DB performance scenario tasks:
 Done when:
 
 - [ ] Each scenario is reproducible.
+- [ ] Advanced scenarios include both client-mode and cluster-mode log layout coverage.
 - [ ] Each scenario has expected finding JSON.
 - [ ] Cleanup restores demo state.
 - [ ] Harrier detects each scenario or records known evidence gaps.

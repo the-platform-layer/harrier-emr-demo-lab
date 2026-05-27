@@ -1,5 +1,19 @@
 # Scenarios
 
+Every Spark scenario should record the deploy mode used by the run:
+
+```text
+client
+cluster
+```
+
+This matters because driver logs land in different places:
+
+- cluster mode: driver logs are usually YARN/container logs.
+- client mode: driver logs are usually step/controller/Livy/primary-node logs.
+
+The demo lab should include at least one client-mode and one cluster-mode run before the first public demo.
+
 Initial scenario set:
 
 - `happy_path`
