@@ -1,0 +1,6 @@
+{
+  "root_cause_category": "MEMORY_OVERHEAD",
+  "recommendation_type": "SPARK_CONFIG",
+  "pr_ready": true
+}
+

@@ -1,0 +1,6 @@
+{
+  "root_cause_category": "S3_ACCESS_DENIED",
+  "recommendation_type": "IAM",
+  "pr_ready": true
+}
+

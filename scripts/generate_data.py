@@ -1,0 +1,2 @@
+"""Placeholder sample data generator."""
+

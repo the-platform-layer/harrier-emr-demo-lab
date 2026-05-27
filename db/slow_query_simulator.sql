@@ -1,0 +1,2 @@
+-- Placeholder slow query simulator.
+

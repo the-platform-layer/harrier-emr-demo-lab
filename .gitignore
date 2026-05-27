@@ -1,0 +1,14 @@
+.DS_Store
+.venv/
+__pycache__/
+*.pyc
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+.env
+sample-data/generated/*
+sample-data/large/*
+!sample-data/generated/.gitkeep
+!sample-data/large/.gitkeep
+
