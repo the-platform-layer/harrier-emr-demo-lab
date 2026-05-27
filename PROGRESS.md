@@ -6,7 +6,7 @@ Detailed implementation checklists live in [TASKS.md](TASKS.md).
 
 ## Current State
 
-Status: Slice 2 complete.
+Status: Slice 3 implemented; live AWS verification pending.
 
 Remote: https://github.com/the-platform-layer/harrier-emr-demo-lab
 
@@ -15,6 +15,10 @@ Last verified:
 - Terraform Slice 2 baseline validates.
 - Terraform can produce a no-refresh plan for 39 resources.
 - Demo EMR on EC2 baseline infrastructure is defined.
+- Happy path Spark job is implemented.
+- Happy path data generation and EMR step submission helpers are implemented.
+- Investigation context export is implemented with deploy mode, job state, and best-effort YARN application ID extraction.
+- Local verification passed; the job has not been submitted to a live EMR cluster in this session.
 - Scenario folder structure and expected findings placeholders exist.
 - Repo contains no production MCP server implementation or MCP deployment infrastructure.
 
@@ -25,6 +29,7 @@ Last verified:
 - Demo resources must be disposable and clearly tagged.
 - RDS resources stay disabled by default until DB scenarios are implemented.
 - Demo scripts can invoke an already-running Harrier MCP endpoint, but they do not host or deploy Harrier.
+- Long-running jobs are first-class demo targets; they should produce evidence before the Spark step fails.
 
 ## Repo Boundary
 
@@ -54,19 +59,20 @@ This repo does not own:
 | --- | --- | --- | --- |
 | 0. Bootstrap repos | Done | both | Initial private repos created under `the-platform-layer`. |
 | 2. Demo EMR baseline infra | Done | harrier-emr-demo-lab | VPC, S3, EMR, IAM, logging, lifecycle, alarms, and docs added. |
-| 3. Happy path Spark job | Not started | harrier-emr-demo-lab | Generate data, submit EMR step, export investigation context. |
+| 3. Happy path Spark job | Implemented | harrier-emr-demo-lab | Generate data, submit EMR step, export investigation context. Needs live EMR run. |
 | 10. Demo scenarios batch 1 | Not started | harrier-emr-demo-lab | `executor_oom`, `driver_oom`, `missing_dependency`, `s3_access_denied`, `bad_input_data`. |
-| 14. Demo scenarios batch 2 | Not started | harrier-emr-demo-lab | Advanced Spark/IAM/DB/Livy/storage scenarios. |
+| 14. Demo scenarios batch 2 | Not started | harrier-emr-demo-lab | Advanced Spark/IAM/DB/Livy/storage and long-running delay scenarios. |
 | 19. Scenario validation harness | Started | harrier-emr-demo-lab | Placeholder script exists. |
 
 ## Next Session Start Here
 
 Recommended next task:
 
-1. Implement Slice 3: happy path Spark job.
-2. Generate sample data into the raw S3 bucket.
-3. Submit the happy path job as an EMR step.
-4. Export investigation context JSON with cluster ID, step ID, application ID where available, region, and time window.
+1. Deploy the demo baseline in a demo AWS account if not already running.
+2. Run `./scripts/run_scenario.sh happy_path`.
+3. Confirm processed S3 output and EMR logs.
+4. Export context with `./scripts/export_investigation_context.sh`.
+5. Start Slice 10 with the first controlled failure scenario.
 
 ## Open Questions
 

@@ -7,3 +7,10 @@
 5. Harrier receives normal MCP investigation inputs; it does not receive demo scenario commands.
 
 The exported investigation context should include `deploy_mode` when known so Harrier can choose the correct driver log layout.
+
+For a baseline check before failure demos, run:
+
+```bash
+./scripts/run_scenario.sh happy_path
+./scripts/export_investigation_context.sh
+```

@@ -1,0 +1,18 @@
+{
+  "scenario": "long_running_resource_delay",
+  "expected_outcome": "running",
+  "expected_root_cause_category": "RUNNING_JOB_RESOURCE_DELAY",
+  "acceptable_related_categories": [
+    "CLUSTER_CAPACITY",
+    "MEMORY_OVERHEAD"
+  ],
+  "expected_evidence": [
+    "EMR step or YARN application is still running",
+    "YARN containers are pending or executor allocation is constrained",
+    "CloudWatch or YARN evidence shows memory, vCPU, node, or capacity pressure"
+  ],
+  "expected_recommendations": [
+    "Suggest executor sizing, memory overhead, dynamic allocation, or partition count changes",
+    "Return operator runbook steps for cluster capacity changes without directly modifying AWS resources"
+  ]
+}

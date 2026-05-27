@@ -1,0 +1,10 @@
+{
+  "scenario": "happy_path",
+  "expected_outcome": "success",
+  "expected_findings": [],
+  "expected_evidence": [
+    "EMR step reaches COMPLETED",
+    "Spark application id is visible in EMR step logs after the job starts",
+    "Processed parquet output exists under the processed S3 bucket"
+  ]
+}

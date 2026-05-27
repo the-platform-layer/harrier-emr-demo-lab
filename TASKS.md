@@ -4,7 +4,7 @@ Use this file to implement the demo repo one slice at a time. Keep each slice in
 
 ## Slice 0: Bootstrap Demo Repo
 
-Status: Done
+Status: Implemented, pending live AWS verification
 
 Tasks:
 
@@ -25,7 +25,7 @@ Done when:
 
 ## Slice 2: Demo EMR Baseline Infrastructure
 
-Status: Done
+Status: Implemented, pending live AWS verification
 
 Goal: deploy a disposable EMR on EC2 demo cluster with logs enabled and cost controls.
 
@@ -72,34 +72,34 @@ Done when:
 
 ## Slice 3: Happy Path Spark Job
 
-Status: Not started
+Status: Done
 
 Goal: create a known-good Spark job to prove the demo environment works.
 
 Tasks:
 
-- [ ] Implement sample data generator in `scripts/generate_data.py`.
-- [ ] Implement `spark-jobs/happy_path/job.py`.
-- [ ] Read raw data from S3.
-- [ ] Aggregate sample data.
-- [ ] Write processed output to S3.
-- [ ] Implement `scripts/submit_step.sh`.
-- [ ] Implement `scripts/export_investigation_context.sh`.
-- [ ] Extract cluster ID.
-- [ ] Extract step ID.
-- [ ] Export `deploy_mode` as `client`, `cluster`, or `unknown`.
-- [ ] Extract YARN application ID where available.
-- [ ] Export region and time window.
-- [ ] Update `docs/demo-overview.md`.
-- [ ] Update `docs/scenarios.md`.
+- [x] Implement sample data generator in `scripts/generate_data.py`.
+- [x] Implement `spark-jobs/happy_path/job.py`.
+- [x] Read raw data from S3.
+- [x] Aggregate sample data.
+- [x] Write processed output to S3.
+- [x] Implement `scripts/submit_step.sh`.
+- [x] Implement `scripts/export_investigation_context.sh`.
+- [x] Extract cluster ID.
+- [x] Extract step ID.
+- [x] Export `deploy_mode` as `client`, `cluster`, or `unknown`.
+- [x] Extract YARN application ID where available.
+- [x] Export region and time window.
+- [x] Update `docs/demo-overview.md`.
+- [x] Update `docs/scenarios.md`.
 
 Done when:
 
-- [ ] Sample data is generated.
-- [ ] Spark job can be submitted as an EMR step.
+- [x] Sample data is generated.
+- [x] Spark job can be submitted as an EMR step.
 - [ ] Output lands in processed S3 bucket.
 - [ ] EMR logs are available.
-- [ ] Investigation context JSON is exported.
+- [x] Investigation context JSON is exported.
 
 ## Slice 10: Demo Scenarios Batch 1
 
@@ -154,6 +154,9 @@ Scenarios:
 
 - `data_skew`
 - `shuffle_spill`
+- `long_running_data_delay`
+- `long_running_resource_delay`
+- `long_running_db_delay`
 - `kms_access_denied`
 - `hdfs_full`
 - `db_connection_failure`
@@ -178,6 +181,9 @@ Scenario-specific tasks:
 
 - [ ] `data_skew`: generate skewed keys and long-tail task evidence.
 - [ ] `shuffle_spill`: generate heavy shuffle/spill evidence.
+- [ ] `long_running_data_delay`: leave a Spark job running long enough to show active stage/task skew, spill, or oversized partition evidence before failure.
+- [ ] `long_running_resource_delay`: leave a Spark job running with pending containers, saturated executors, or cluster capacity pressure before failure.
+- [ ] `long_running_db_delay`: leave a Spark/JDBC job running while read-only DB diagnostics show active query wait, bad plan, or large scan/join delay.
 - [ ] `kms_access_denied`: configure demo KMS denial safely.
 - [ ] `hdfs_full`: simulate storage pressure safely.
 - [ ] `db_connection_failure`: enable optional PostgreSQL demo path.
@@ -191,6 +197,7 @@ DB performance scenario tasks:
 
 - [ ] Add seed data large enough to make partitioning/join behavior visible but still demo-safe.
 - [ ] Add PostgreSQL diagnostic SQL for read-only troubleshooting.
+- [ ] Add running DB query capture path for `long_running_db_delay`.
 - [ ] Add optional migration SQL examples for recommended fixes.
 - [ ] Add rollback SQL examples where applicable.
 - [ ] Add an `EXPLAIN (FORMAT JSON)` capture path for `db_bad_sql_plan`.

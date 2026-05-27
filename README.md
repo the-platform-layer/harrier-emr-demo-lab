@@ -55,6 +55,26 @@ Key outputs:
 - `region`
 - `max_runtime_hours`
 
+## Run Happy Path
+
+After the baseline cluster exists, submit the known-good Spark job:
+
+```bash
+./scripts/run_scenario.sh happy_path
+```
+
+The script generates deterministic CSV input, uploads it to the raw S3 bucket, uploads the PySpark job, submits an EMR step, and writes the latest context to `.harrier-demo/last-context.json`.
+
+Use `DEPLOY_MODE=client` or `DEPLOY_MODE=cluster` to choose the Spark driver log layout for a run. Cluster mode is the default.
+
+Export the Harrier investigation context:
+
+```bash
+./scripts/export_investigation_context.sh
+```
+
+The exporter preserves cluster ID, step ID, deploy mode, job state, region, S3 paths, and time window. When EMR step logs are available in S3, it also tries to extract the YARN application ID.
+
 ## Destroy
 
 ```bash

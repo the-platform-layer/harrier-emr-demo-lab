@@ -7,8 +7,8 @@ __pycache__/
 *.tfstate.*
 terraform.tfvars
 .env
+.harrier-demo/
 sample-data/generated/*
 sample-data/large/*
 !sample-data/generated/.gitkeep
 !sample-data/large/.gitkeep
-

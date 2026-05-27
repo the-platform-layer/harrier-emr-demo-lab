@@ -1,0 +1,18 @@
+{
+  "scenario": "long_running_data_delay",
+  "expected_outcome": "running",
+  "expected_root_cause_category": "RUNNING_JOB_DATA_DELAY",
+  "acceptable_related_categories": [
+    "DATA_SKEW",
+    "SHUFFLE_SPILL"
+  ],
+  "expected_evidence": [
+    "EMR step or YARN application is still running",
+    "Spark stage has long-running or skewed tasks",
+    "Task metrics show uneven input, shuffle spill, or oversized partitions"
+  ],
+  "expected_recommendations": [
+    "Suggest Spark partitioning, skew mitigation, filtering, or join strategy changes",
+    "Prepare PR-ready Spark code or config changes when repo context is available"
+  ]
+}

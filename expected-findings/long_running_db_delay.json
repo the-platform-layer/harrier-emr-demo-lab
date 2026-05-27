@@ -1,0 +1,20 @@
+{
+  "scenario": "long_running_db_delay",
+  "expected_outcome": "running",
+  "expected_root_cause_category": "RUNNING_JOB_DB_DELAY",
+  "acceptable_related_categories": [
+    "DB_PARTITION_HOTSPOT",
+    "DB_LARGE_JOIN_SPILL",
+    "DB_BAD_SQL_PLAN",
+    "DB_QUERY_PERFORMANCE"
+  ],
+  "expected_evidence": [
+    "EMR step or YARN application is still running",
+    "Spark JDBC stage remains active",
+    "Read-only DB diagnostics show a long-running active query, wait event, large scan, or expensive plan"
+  ],
+  "expected_recommendations": [
+    "Suggest JDBC partitioning, predicate pushdown, query rewrite, index, or statistics changes",
+    "Prepare PR-ready SQL migration, rollback SQL, or Spark JDBC code/config changes when safe"
+  ]
+}
