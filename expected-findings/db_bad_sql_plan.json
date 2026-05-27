@@ -1,0 +1,6 @@
+{
+  "root_cause_category": "DB_BAD_SQL_PLAN",
+  "recommendation_type": "DB",
+  "pr_ready": true
+}
+

@@ -19,6 +19,7 @@ Advanced scenarios:
 - `db_lock_timeout`
 - `db_partition_hotspot`
 - `db_large_join_spill`
+- `db_bad_sql_plan`
 - `livy_session_failure`
 
 ## DB Performance Scenarios
@@ -56,3 +57,21 @@ Expected recommendation:
 - Rewrite the join or pre-filter data before the join.
 - Adjust Spark join strategy when the expensive work is on the Spark side.
 - Prepare a PR with SQL migration and rollback SQL where safe.
+
+### `db_bad_sql_plan`
+
+Simulates a failed or clearly bad SQL execution plan for a query used by Spark/JDBC.
+
+Expected evidence:
+
+- Spark/JDBC stage is slow, fails, or times out while running a SQL query.
+- Read-only PostgreSQL diagnostics capture active query text or query age.
+- `EXPLAIN (FORMAT JSON)` or equivalent plan evidence shows a sequential scan over a large table, bad join order, nested loop over large inputs, missing index, stale statistics, or excessive sort/hash cost.
+- Table/index metadata supports the diagnosis.
+
+Expected recommendation:
+
+- Add or adjust an index via reviewed migration.
+- Rewrite the query to improve predicate pushdown or join shape.
+- Add `ANALYZE`/statistics guidance as a validation step where stale stats are suspected.
+- Prepare a PR with SQL migration, rollback SQL, and validation query.
