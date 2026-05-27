@@ -6,15 +6,16 @@ Detailed implementation checklists live in [TASKS.md](TASKS.md).
 
 ## Current State
 
-Status: Slice 0 scaffold complete.
+Status: Slice 2 complete.
 
 Remote: https://github.com/the-platform-layer/harrier-emr-demo-lab
 
 Last verified:
 
-- Python placeholder files compile.
-- Scenario folder structure exists.
-- Expected findings placeholders exist.
+- Terraform Slice 2 baseline validates.
+- Terraform can produce a no-refresh plan for 39 resources.
+- Demo EMR on EC2 baseline infrastructure is defined.
+- Scenario folder structure and expected findings placeholders exist.
 - Repo contains no production MCP server implementation or MCP deployment infrastructure.
 
 ## Decisions
@@ -52,7 +53,7 @@ This repo does not own:
 | Slice | Status | Owner Repo | Notes |
 | --- | --- | --- | --- |
 | 0. Bootstrap repos | Done | both | Initial private repos created under `the-platform-layer`. |
-| 2. Demo EMR baseline infra | Not started | harrier-emr-demo-lab | Add VPC, S3, EMR, IAM, logging, lifecycle, cost controls. |
+| 2. Demo EMR baseline infra | Done | harrier-emr-demo-lab | VPC, S3, EMR, IAM, logging, lifecycle, alarms, and docs added. |
 | 3. Happy path Spark job | Not started | harrier-emr-demo-lab | Generate data, submit EMR step, export investigation context. |
 | 10. Demo scenarios batch 1 | Not started | harrier-emr-demo-lab | `executor_oom`, `driver_oom`, `missing_dependency`, `s3_access_denied`, `bad_input_data`. |
 | 14. Demo scenarios batch 2 | Not started | harrier-emr-demo-lab | Advanced Spark/IAM/DB/Livy/storage scenarios. |
@@ -62,20 +63,15 @@ This repo does not own:
 
 Recommended next task:
 
-1. Implement baseline Terraform for demo EMR on EC2.
-2. Include cost and retention controls from the start:
-   - EMR auto-termination
-   - S3 lifecycle rules
-   - CloudWatch log retention
-   - `Project=harrier-demo` and `Environment=demo` tags
-3. Keep resource names prefixed with `harrier-demo`.
-4. Do not add MCP server code to this repo.
+1. Implement Slice 3: happy path Spark job.
+2. Generate sample data into the raw S3 bucket.
+3. Submit the happy path job as an EMR step.
+4. Export investigation context JSON with cluster ID, step ID, application ID where available, region, and time window.
 
 ## Open Questions
 
-- Confirm target AWS region for demo default: currently `ap-southeast-2`.
 - Confirm allowed instance types and max runtime for demo clusters.
-- Decide whether budget alarm is Terraform-managed or documented as an account-level setup step.
+- Decide whether default instance types should remain `m5.xlarge` before first real deploy.
 
 ## Useful Commands
 
@@ -83,4 +79,6 @@ Recommended next task:
 cd /Users/pinakimukherjee/Documents/Workspace/harrier-emr-demo-lab
 python3 -m compileall scripts spark-jobs db
 find . -maxdepth 3 -type f | sort
+cd infra/terraform && terraform validate
+cd infra/terraform && terraform plan -refresh=false
 ```

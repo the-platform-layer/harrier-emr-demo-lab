@@ -25,50 +25,50 @@ Done when:
 
 ## Slice 2: Demo EMR Baseline Infrastructure
 
-Status: Not started
+Status: Done
 
 Goal: deploy a disposable EMR on EC2 demo cluster with logs enabled and cost controls.
 
 Tasks:
 
-- [ ] Add AWS provider configuration.
-- [ ] Add common tags:
-  - [ ] `Project=harrier-demo`
-  - [ ] `Environment=demo`
-- [ ] Add VPC.
-- [ ] Add private/public subnets as needed.
-- [ ] Add security groups.
-- [ ] Add S3 raw bucket.
-- [ ] Add S3 processed bucket.
-- [ ] Add S3 EMR logs bucket.
-- [ ] Add S3 lifecycle rules.
-- [ ] Add EMR service role.
-- [ ] Add EMR EC2 instance profile.
-- [ ] Add EMR on EC2 cluster.
-- [ ] Install Spark.
-- [ ] Install Livy.
-- [ ] Enable S3 logging.
-- [ ] Add EMR auto-termination policy.
-- [ ] Add CloudWatch log retention.
-- [ ] Add alarm placeholders.
-- [ ] Keep RDS disabled by default.
-- [ ] Add optional cost alarm or document AWS Budget setup.
-- [ ] Add Terraform outputs:
-  - [ ] `cluster_id`
-  - [ ] `log_uri`
-  - [ ] `raw_bucket`
-  - [ ] `processed_bucket`
-  - [ ] `region`
-  - [ ] `max_runtime_hours`
-- [ ] Update `docs/cost-and-retention.md`.
-- [ ] Update `README.md` with deploy and cleanup notes.
+- [x] Add AWS provider configuration.
+- [x] Add common tags:
+  - [x] `Project=harrier-demo`
+  - [x] `Environment=demo`
+- [x] Add VPC.
+- [x] Add private/public subnets as needed.
+- [x] Add security groups.
+- [x] Add S3 raw bucket.
+- [x] Add S3 processed bucket.
+- [x] Add S3 EMR logs bucket.
+- [x] Add S3 lifecycle rules.
+- [x] Add EMR service role.
+- [x] Add EMR EC2 instance profile.
+- [x] Add EMR on EC2 cluster.
+- [x] Install Spark.
+- [x] Install Livy.
+- [x] Enable S3 logging.
+- [x] Add EMR auto-termination policy.
+- [x] Add CloudWatch log retention.
+- [x] Add alarm placeholders.
+- [x] Keep RDS disabled by default.
+- [x] Add optional cost alarm or document AWS Budget setup.
+- [x] Add Terraform outputs:
+  - [x] `cluster_id`
+  - [x] `log_uri`
+  - [x] `raw_bucket`
+  - [x] `processed_bucket`
+  - [x] `region`
+  - [x] `max_runtime_hours`
+- [x] Update `docs/cost-and-retention.md`.
+- [x] Update `README.md` with deploy and cleanup notes.
 
 Done when:
 
-- [ ] `terraform validate` passes.
-- [ ] Terraform can produce a plan.
-- [ ] All resources are clearly prefixed/tagged as demo.
-- [ ] Cost and cleanup instructions are documented.
+- [x] `terraform validate` passes.
+- [x] Terraform can produce a plan.
+- [x] All resources are clearly prefixed/tagged as demo.
+- [x] Cost and cleanup instructions are documented.
 
 ## Slice 3: Happy Path Spark Job
 
@@ -211,4 +211,3 @@ Done when:
 - [ ] Harness can run locally against a configured demo AWS account.
 - [ ] Harness does not deploy or host the MCP server.
 - [ ] Harness output is deterministic enough for regression tracking.
-

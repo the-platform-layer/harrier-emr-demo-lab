@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "TODO: deploy demo infrastructure"
+cd "$(dirname "$0")/../infra/terraform"
 
+terraform init
+terraform apply

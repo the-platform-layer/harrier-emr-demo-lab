@@ -1,12 +1,40 @@
 terraform {
   required_version = ">= 1.6.0"
-}
 
-locals {
-  project = "harrier-demo"
-  tags = {
-    Project     = "harrier-demo"
-    Environment = "demo"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.6"
+    }
   }
 }
 
+provider "aws" {
+  region = var.region
+
+  default_tags {
+    tags = local.tags
+  }
+}
+
+locals {
+  project     = "harrier-demo"
+  name_prefix = var.name_prefix
+  tags = {
+    Project     = local.project
+    Environment = "demo"
+    ManagedBy   = "terraform"
+  }
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+resource "random_id" "suffix" {
+  byte_length = 4
+}

@@ -30,3 +30,41 @@ Defaults to implement in Terraform:
 - CloudWatch log retention
 - Optional cost alarm or AWS Budget setup
 - Cleanup scripts per scenario
+
+## Deploy Baseline Infrastructure
+
+```bash
+cd infra/terraform
+terraform init
+terraform plan
+terraform apply
+```
+
+Or use the helper:
+
+```bash
+./scripts/deploy.sh
+```
+
+Key outputs:
+
+- `cluster_id`
+- `log_uri`
+- `raw_bucket`
+- `processed_bucket`
+- `region`
+- `max_runtime_hours`
+
+## Destroy
+
+```bash
+./scripts/destroy.sh
+```
+
+The destroy helper prints Terraform-managed resources and requires an explicit confirmation phrase.
+
+## Cost Warning
+
+The default cluster uses one primary node and one core node. EMR auto-termination is enabled after the configured idle period, but this is not a hard wall-clock cap if jobs keep the cluster busy.
+
+Set up an AWS Budget or billing alarm for the demo account before long-running scenario work.
