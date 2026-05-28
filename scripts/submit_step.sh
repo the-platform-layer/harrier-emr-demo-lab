@@ -737,8 +737,9 @@ print(json.dumps({
 PY
     )"
     spark_args+=(
-      "--conf" "spark.task.maxFailures=1"
+      "--conf" "spark.task.maxFailures=2"
       "--conf" "spark.excludeOnFailure.enabled=false"
+      "--conf" "spark.yarn.excludeDecommissioningNodes.enabled=false"
       "$job_s3_uri"
       "--output" "$output_s3_uri"
       "--run-id" "$run_id"
