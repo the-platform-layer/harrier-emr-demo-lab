@@ -26,7 +26,9 @@ from validation.validate import (
     _RUNNING_SIGNAL_FIELDS,
     build_mcp_request,
     load_json,
+    normalize_s3_uri,
     parse_args,
+    wait_for_emr_s3_logs,
 )
 
 
@@ -574,6 +576,17 @@ class TestParseArgs(unittest.TestCase):
         self.assertEqual(args.wait_timeout, 120)
         self.assertEqual(args.poll_interval, 5)
 
+    def test_log_wait_args(self) -> None:
+        args = parse_args([
+            "--account-id", "123456789012",
+            "--log-wait-timeout", "180",
+            "--log-poll-interval", "3",
+            "--no-log-wait",
+        ])
+        self.assertEqual(args.log_wait_timeout, 180)
+        self.assertEqual(args.log_poll_interval, 3)
+        self.assertTrue(args.no_log_wait)
+
 
 class TestLoadJson(unittest.TestCase):
     def test_loads_valid_file(self) -> None:
@@ -591,6 +604,78 @@ class TestLoadJson(unittest.TestCase):
     def test_raises_for_missing_file(self) -> None:
         with self.assertRaises(FileNotFoundError):
             load_json("/nonexistent/path/file.json")
+
+
+class TestLogWaitHelpers(unittest.TestCase):
+    def _context(self) -> dict:
+        return {
+            "region": "ap-southeast-2",
+            "cluster_id": "j-ABC123",
+            "deploy_mode": "cluster",
+            "job_state": "failed",
+            "step_id": "s-XYZ",
+            "application_id": "application_1_0001",
+            "log_uri": "s3n://demo-logs/emr/",
+        }
+
+    def test_normalize_s3_uri(self) -> None:
+        self.assertEqual(normalize_s3_uri("s3n://bucket/logs"), "s3://bucket/logs")
+        self.assertEqual(normalize_s3_uri("s3a://bucket/logs"), "s3://bucket/logs")
+        self.assertEqual(normalize_s3_uri("s3://bucket/logs"), "s3://bucket/logs")
+
+    @patch("validation.validate.export_context")
+    @patch("validation.validate.subprocess.check_output")
+    def test_wait_for_cluster_logs_requires_step_and_application_logs(
+        self,
+        mock_check_output: MagicMock,
+        mock_export_context: MagicMock,
+    ) -> None:
+        ctx = self._context()
+        mock_export_context.return_value = ctx
+        mock_check_output.side_effect = [
+            "2026-01-01 00:00:00       10 stderr.gz\n",
+            "2026-01-01 00:00:00       10 stdout.gz\n",
+        ]
+
+        result = wait_for_emr_s3_logs(
+            repo_root=ROOT,
+            context_file=ROOT / ".harrier-demo" / "last-context.json",
+            exported_file=ROOT / ".harrier-demo" / "last-context-exported.json",
+            context=ctx,
+            expected_outcome="failed",
+            timeout=1,
+            poll_interval=1,
+        )
+
+        self.assertEqual(result["application_id"], "application_1_0001")
+        called_uris = [call.args[0][3] for call in mock_check_output.call_args_list]
+        self.assertIn("s3://demo-logs/emr/j-ABC123/steps/s-XYZ/", called_uris)
+        self.assertIn(
+            "s3://demo-logs/emr/j-ABC123/containers/application_1_0001/",
+            called_uris,
+        )
+
+    @patch("validation.validate.export_context")
+    @patch("validation.validate.subprocess.check_output")
+    def test_wait_for_running_outcome_skips_s3_checks(
+        self,
+        mock_check_output: MagicMock,
+        mock_export_context: MagicMock,
+    ) -> None:
+        ctx = self._context()
+        result = wait_for_emr_s3_logs(
+            repo_root=ROOT,
+            context_file=ROOT / ".harrier-demo" / "last-context.json",
+            exported_file=ROOT / ".harrier-demo" / "last-context-exported.json",
+            context=ctx,
+            expected_outcome="running",
+            timeout=1,
+            poll_interval=1,
+        )
+
+        self.assertIs(result, ctx)
+        mock_check_output.assert_not_called()
+        mock_export_context.assert_not_called()
 
 
 class TestBuildMcpRequest(unittest.TestCase):

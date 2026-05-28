@@ -13,6 +13,9 @@
 #   SKIP_SCENARIO_RUN  Set to 1 to skip job submission and use existing context
 #   CLUSTER_ID         Override cluster_id from context
 #   AWS_REGION         Override region from context
+#   LOG_WAIT_TIMEOUT   Max seconds to wait for EMR logs in S3 (default: 420)
+#   LOG_POLL_INTERVAL  S3 log polling interval in seconds (default: 30)
+#   NO_LOG_WAIT        Set to 1 to skip the EMR S3 log wait
 #   PYTHON_BIN         Python executable to use (default: python3)
 #
 # Examples:

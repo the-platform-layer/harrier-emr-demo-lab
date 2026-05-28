@@ -19,6 +19,7 @@ Optional env vars
   SKIP_SCENARIO_RUN   Set to 1 to skip scripts/run_scenario.sh
   CLUSTER_ID          Override cluster_id read from context file
   AWS_REGION          Override region read from context file
+  LOG_WAIT_TIMEOUT    Max seconds to wait for EMR logs in S3
 """
 
 from __future__ import annotations
@@ -112,6 +113,26 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         metavar="SECONDS",
         help="Step polling interval in seconds (default: 15)",
     )
+    parser.add_argument(
+        "--log-wait-timeout",
+        type=int,
+        default=int(os.environ.get("LOG_WAIT_TIMEOUT", "420")),
+        metavar="SECONDS",
+        help="Max seconds to wait for EMR S3 logs before calling MCP (default: 420)",
+    )
+    parser.add_argument(
+        "--log-poll-interval",
+        type=int,
+        default=int(os.environ.get("LOG_POLL_INTERVAL", "30")),
+        metavar="SECONDS",
+        help="S3 log polling interval in seconds (default: 30)",
+    )
+    parser.add_argument(
+        "--no-log-wait",
+        action="store_true",
+        default=os.environ.get("NO_LOG_WAIT", "0") == "1",
+        help="Do not wait for EMR logs in S3 before calling MCP",
+    )
     return parser.parse_args(argv)
 
 
@@ -194,6 +215,110 @@ def wait_for_step(
     raise TimeoutError(
         f"Step {step_id} did not reach terminal state within {timeout}s"
     )
+
+
+def normalize_s3_uri(uri: str) -> str:
+    """Normalize Hadoop S3 schemes to an aws-cli-compatible s3:// URI."""
+    for legacy in ("s3n://", "s3a://"):
+        if uri.startswith(legacy):
+            return "s3://" + uri[len(legacy):]
+    return uri
+
+
+def _s3_ls(uri: str, region: str) -> str:
+    return subprocess.check_output(
+        ["aws", "s3", "ls", normalize_s3_uri(uri), "--region", region],
+        stderr=subprocess.DEVNULL,
+        text=True,
+    )
+
+
+def _has_step_logs(log_uri: str, cluster_id: str, step_id: str, region: str) -> bool:
+    step_uri = f"{normalize_s3_uri(log_uri).rstrip('/')}/{cluster_id}/steps/{step_id}/"
+    try:
+        listing = _s3_ls(step_uri, region)
+    except subprocess.CalledProcessError:
+        return False
+    names = ("stderr", "stdout", "controller", "syslog")
+    return any(f" {name}" in listing for name in names)
+
+
+def _has_application_logs(log_uri: str, cluster_id: str, application_id: str, region: str) -> bool:
+    app_uri = f"{normalize_s3_uri(log_uri).rstrip('/')}/{cluster_id}/containers/{application_id}/"
+    try:
+        listing = _s3_ls(app_uri, region)
+    except subprocess.CalledProcessError:
+        return False
+    names = ("stderr", "stdout", "syslog")
+    return any(f" {name}" in listing for name in names)
+
+
+def wait_for_emr_s3_logs(
+    *,
+    repo_root: Path,
+    context_file: Path,
+    exported_file: Path,
+    context: dict[str, Any],
+    expected_outcome: str,
+    timeout: int = 420,
+    poll_interval: int = 30,
+) -> dict[str, Any]:
+    """Wait for EMR step/container logs to be visible in S3.
+
+    EMR step state can become terminal before the archived logs are readable.
+    Cluster deploy mode is especially laggy because the Python exception is
+    usually in YARN container stdout/stderr rather than the step wrapper logs.
+    """
+    if expected_outcome == "running":
+        return context
+
+    cluster_id = context.get("cluster_id", "")
+    step_id = context.get("step_id", "")
+    region = context.get("region", "")
+    log_uri = context.get("log_uri", "")
+    deploy_mode = context.get("deploy_mode", "unknown")
+
+    if not (cluster_id and step_id and region and log_uri):
+        return context
+
+    deadline = time.monotonic() + timeout
+    latest_context = context
+    while time.monotonic() < deadline:
+        step_ready = _has_step_logs(log_uri, cluster_id, step_id, region)
+        app_ready = True
+        application_id = latest_context.get("application_id")
+
+        if deploy_mode == "cluster" and expected_outcome == "failed":
+            if not application_id:
+                try:
+                    latest_context = export_context(repo_root, context_file, exported_file)
+                    application_id = latest_context.get("application_id")
+                except (FileNotFoundError, RuntimeError):
+                    application_id = None
+            app_ready = bool(application_id) and _has_application_logs(
+                log_uri,
+                cluster_id,
+                application_id,
+                region,
+            )
+
+        if step_ready and app_ready:
+            try:
+                return export_context(repo_root, context_file, exported_file)
+            except (FileNotFoundError, RuntimeError):
+                return latest_context
+
+        remaining = max(0, int(deadline - time.monotonic()))
+        app_label = application_id or "(not inferred yet)"
+        print(
+            "  Waiting for EMR S3 logs "
+            f"(step_logs={step_ready}, app_logs={app_ready}, app={app_label}; "
+            f"{remaining}s remaining)"
+        )
+        time.sleep(poll_interval)
+
+    print("  Warning: EMR S3 logs were not fully available before timeout.")
+    return latest_context
 
 
 def build_mcp_request(
@@ -318,6 +443,18 @@ def main(argv: list[str] | None = None) -> int:
             context = export_context(repo_root, context_file, exported_file)
         except (TimeoutError, RuntimeError) as exc:
             print(f"  Warning: {exc}. Proceeding with current context.")
+
+    if expected_outcome != "running" and not args.no_log_wait:
+        print("Waiting for EMR logs in S3…")
+        context = wait_for_emr_s3_logs(
+            repo_root=repo_root,
+            context_file=context_file,
+            exported_file=exported_file,
+            context=context,
+            expected_outcome=expected_outcome,
+            timeout=args.log_wait_timeout,
+            poll_interval=args.log_poll_interval,
+        )
 
     # ------------------------------------------------------------------
     # Step 5: Call Harrier MCP
