@@ -234,7 +234,7 @@ Tasks:
 - [x] Document required environment variables (HARRIER_MCP_URL, AWS_ACCOUNT_ID, SKIP_SCENARIO_RUN).
 - [x] Implement `validation/compare.py` with ValidationCheck and ComparisonResult dataclasses.
 - [x] Implement `validation/report.py` with format_report and write_report.
-- [x] Add 73 unit tests in `tests/test_slice19_harness.py`; all pass without live AWS or MCP calls.
+- [x] Add 83 unit tests in `tests/test_slice19_harness.py`; all pass without live AWS or MCP calls.
 
 Done when:
 

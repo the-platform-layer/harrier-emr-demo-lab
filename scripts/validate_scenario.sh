@@ -13,6 +13,7 @@
 #   SKIP_SCENARIO_RUN  Set to 1 to skip job submission and use existing context
 #   CLUSTER_ID         Override cluster_id from context
 #   AWS_REGION         Override region from context
+#   PYTHON_BIN         Python executable to use (default: python3)
 #
 # Examples:
 #   # Run the executor_oom scenario end-to-end and validate Harrier's finding:
@@ -29,12 +30,13 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+python_bin="${PYTHON_BIN:-python3}"
 
 scenario="${1:-}"
 if [[ $# -gt 0 ]]; then
   shift
 fi
 
-exec /usr/local/bin/python3.10 "$repo_root/validation/validate.py" \
+exec "$python_bin" "$repo_root/validation/validate.py" \
   ${scenario:+--scenario "$scenario"} \
   "$@"

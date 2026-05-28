@@ -745,6 +745,11 @@ class TestValidateScenarioSh(unittest.TestCase):
         content = self._SCRIPT.read_text(encoding="utf-8")
         self.assertIn("SKIP_SCENARIO_RUN", content)
 
+    def test_script_uses_configurable_python(self) -> None:
+        content = self._SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("PYTHON_BIN", content)
+        self.assertNotIn("/usr/local/bin/python3.10", content)
+
 
 # ---------------------------------------------------------------------------
 # Expected findings schema sanity check
