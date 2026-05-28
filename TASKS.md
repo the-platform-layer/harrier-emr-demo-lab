@@ -213,28 +213,31 @@ Done when:
 
 ## Slice 19: Scenario Validation Harness
 
-Status: Started
+Status: Done
 
 Goal: automate regression testing for Harrier against demo scenarios.
 
 Tasks:
 
-- [ ] Implement `scripts/validate_scenario.sh`.
-- [ ] Accept scenario name as input.
-- [ ] Run selected scenario.
-- [ ] Export investigation context JSON.
-- [ ] Invoke already-running Harrier MCP endpoint.
-- [ ] Capture Harrier result.
-- [ ] Load `expected-findings/<scenario>.json`.
-- [ ] Compare actual root cause category to expected category.
-- [ ] Print pass/fail summary.
-- [ ] Write validation report JSON.
-- [ ] Add failure output useful for debugging.
-- [ ] Document required environment variables.
-- [ ] Update `docs/expected-findings.md`.
+- [x] Implement `scripts/validate_scenario.sh` (thin wrapper around `validation/validate.py`).
+- [x] Accept scenario name as input.
+- [x] Run selected scenario (via `scripts/run_scenario.sh`; skippable with `SKIP_SCENARIO_RUN=1`).
+- [x] Export investigation context JSON (via `scripts/export_investigation_context.sh`).
+- [x] Invoke already-running Harrier MCP endpoint (MCP Streamable HTTP client in `validation/harrier_client.py`).
+- [x] Capture Harrier result.
+- [x] Load `expected-findings/<scenario>.json`.
+- [x] Compare actual root cause category to expected category.
+- [x] Check recommendation_type and pr_ready when present in expected findings.
+- [x] Print pass/fail summary.
+- [x] Write validation report JSON to `.harrier-demo/validation/<scenario>-<ts>.json`.
+- [x] Add failure output useful for debugging (per-check messages, expected vs actual).
+- [x] Document required environment variables (HARRIER_MCP_URL, AWS_ACCOUNT_ID, SKIP_SCENARIO_RUN).
+- [x] Implement `validation/compare.py` with ValidationCheck and ComparisonResult dataclasses.
+- [x] Implement `validation/report.py` with format_report and write_report.
+- [x] Add 73 unit tests in `tests/test_slice19_harness.py`; all pass without live AWS or MCP calls.
 
 Done when:
 
-- [ ] Harness can run locally against a configured demo AWS account.
-- [ ] Harness does not deploy or host the MCP server.
-- [ ] Harness output is deterministic enough for regression tracking.
+- [x] Harness can run locally against a configured demo AWS account.
+- [x] Harness does not deploy or host the MCP server.
+- [x] Harness output is deterministic enough for regression tracking.
