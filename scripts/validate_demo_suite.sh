@@ -36,6 +36,11 @@ default_scenarios=(
   db_lock_timeout
   db_large_join_spill
   livy_session_failure
+  s3_path_missing
+  output_path_conflict
+  schema_mismatch
+  python_worker_crash
+  spot_interruption
 )
 
 if [[ $# -gt 0 ]]; then

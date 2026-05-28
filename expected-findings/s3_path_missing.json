@@ -4,7 +4,7 @@
   "expected_root_cause_category": "S3_PATH_MISSING",
   "acceptable_related_categories": [],
   "recommendation_type": "RUNBOOK",
-  "pr_ready": false,
+  "pr_ready": true,
   "expected_evidence": [
     "Driver log contains NoSuchKey or No such file or directory for a demo S3 path",
     "The missing path is included in the scenario diagnostic signal",
