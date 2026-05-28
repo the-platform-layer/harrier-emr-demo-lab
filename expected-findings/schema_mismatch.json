@@ -1,0 +1,17 @@
+{
+  "scenario": "schema_mismatch",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "BAD_INPUT_DATA",
+  "acceptable_related_categories": [],
+  "recommendation_type": "CODE",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Driver log contains schema mismatch or cannot cast StringType to DoubleType",
+    "Parquet file was written with incompatible column types",
+    "No production data is read or modified"
+  ],
+  "expected_recommendations": [
+    "Add input validation and schema enforcement before processing",
+    "Identify and quarantine malformed input files"
+  ]
+}

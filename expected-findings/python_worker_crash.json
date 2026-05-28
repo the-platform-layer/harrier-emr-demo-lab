@@ -1,0 +1,17 @@
+{
+  "scenario": "python_worker_crash",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "PYTHON_WORKER_CRASH",
+  "acceptable_related_categories": ["EXECUTOR_LOST"],
+  "recommendation_type": "CODE",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Driver log contains PythonException or Python worker process exited unexpectedly",
+    "A UDF raised an unhandled exception inside an executor task",
+    "No production data is read or modified"
+  ],
+  "expected_recommendations": [
+    "Add exception handling inside Python UDFs and log structured errors",
+    "Replace UDFs with native Spark SQL functions where possible"
+  ]
+}

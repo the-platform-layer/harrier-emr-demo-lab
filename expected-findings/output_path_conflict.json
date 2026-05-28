@@ -1,0 +1,17 @@
+{
+  "scenario": "output_path_conflict",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "OUTPUT_PATH_CONFLICT",
+  "acceptable_related_categories": ["S3_PATH_MISSING", "BAD_INPUT_DATA"],
+  "recommendation_type": "CODE",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Driver log contains AnalysisException: path already exists for the demo output path",
+    "The conflicting output URI is included in the scenario diagnostic signal",
+    "No production data is overwritten"
+  ],
+  "expected_recommendations": [
+    "Add an existence check or use SaveMode.Overwrite explicitly",
+    "Enforce idempotent output paths using run-id or partition-date prefixes"
+  ]
+}

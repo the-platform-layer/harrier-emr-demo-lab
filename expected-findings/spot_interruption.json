@@ -1,0 +1,17 @@
+{
+  "scenario": "spot_interruption",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "EXECUTOR_LOST",
+  "acceptable_related_categories": ["MEMORY_OVERHEAD"],
+  "recommendation_type": "SPARK_CONFIG",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Driver log contains executor lost or container killed by YARN",
+    "Remote RPC client disassociation indicates node loss mid-job",
+    "No production data is read or modified"
+  ],
+  "expected_recommendations": [
+    "Enable executor blacklisting and increase max task failure tolerance",
+    "Check EMR node health and instance spot interruptions"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "scenario": "s3_path_missing",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "S3_PATH_MISSING",
+  "acceptable_related_categories": [],
+  "recommendation_type": "RUNBOOK",
+  "pr_ready": false,
+  "expected_evidence": [
+    "Driver log contains NoSuchKey or No such file or directory for a demo S3 path",
+    "The missing path is included in the scenario diagnostic signal",
+    "No production data is read or modified"
+  ],
+  "expected_recommendations": [
+    "Verify the S3 path and confirm upstream data is present",
+    "Add an existence check before reading the S3 path"
+  ]
+}

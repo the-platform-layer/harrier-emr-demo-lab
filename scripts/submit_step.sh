@@ -12,7 +12,8 @@ if [[ -n "${DEPLOY_MODE:-}" ]]; then
   deploy_mode="$DEPLOY_MODE"
 else
   case "$scenario" in
-    driver_oom | missing_dependency | db_connection_failure | db_lock_timeout | livy_session_failure)
+    driver_oom | missing_dependency | db_connection_failure | db_lock_timeout | livy_session_failure | \
+    s3_path_missing | output_path_conflict | schema_mismatch | python_worker_crash | spot_interruption)
       deploy_mode="client"
       ;;
     *)
@@ -629,6 +630,119 @@ PY
       "--output" "$output_s3_uri"
       "--run-id" "$run_id"
       "--sleep-seconds" "$db_sleep_seconds"
+    )
+    ;;
+  s3_path_missing)
+    expected_outcome="failed"
+    missing_suffix="$(python3 -c 'import uuid; print(uuid.uuid4().hex[:8])')"
+    missing_input="${MISSING_INPUT:-s3://$raw_bucket/missing/$missing_suffix/nonexistent.parquet}"
+    diagnostic_signals_json="$(
+      python3 - "$missing_input" <<'PY'
+import json
+import sys
+
+uri = sys.argv[1]
+print(json.dumps({
+    "root_cause_hint": "S3_PATH_MISSING",
+    "missing_input_uri": uri,
+    "log_signal": f"NoSuchKey: The specified key does not exist at {uri}",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--missing-input" "$missing_input"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+    )
+    ;;
+  output_path_conflict)
+    expected_outcome="failed"
+    diagnostic_signals_json="$(
+      python3 - "$output_s3_uri" <<'PY'
+import json
+import sys
+
+uri = sys.argv[1]
+print(json.dumps({
+    "root_cause_hint": "OUTPUT_PATH_CONFLICT",
+    "output_uri": uri,
+    "log_signal": f"path {uri} already exists; AnalysisException output path already exists",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+    )
+    ;;
+  schema_mismatch)
+    expected_outcome="failed"
+    diagnostic_signals_json="$(
+      python3 - "$output_s3_uri" <<'PY'
+import json
+import sys
+
+uri = sys.argv[1]
+print(json.dumps({
+    "root_cause_hint": "BAD_INPUT_DATA",
+    "staging_uri": uri,
+    "log_signal": "schema mismatch: cannot cast StringType to DoubleType; parquet type mismatch",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+    )
+    ;;
+  python_worker_crash)
+    expected_outcome="failed"
+    partitions="${PARTITIONS:-4}"
+    diagnostic_signals_json="$(
+      python3 - <<'PY'
+import json
+print(json.dumps({
+    "root_cause_hint": "PYTHON_WORKER_CRASH",
+    "log_signal": (
+        "An exception was thrown from the Python worker. "
+        "Python worker process exited unexpectedly (crashed). "
+        "PythonException: unhandled exception in Python UDF executor task"
+    ),
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--partitions" "$partitions"
+    )
+    ;;
+  spot_interruption)
+    expected_outcome="failed"
+    partitions="${PARTITIONS:-4}"
+    diagnostic_signals_json="$(
+      python3 - <<'PY'
+import json
+print(json.dumps({
+    "root_cause_hint": "EXECUTOR_LOST",
+    "log_signal": (
+        "executor lost; container killed by YARN due to node loss; "
+        "remote RPC client disassociated from executor"
+    ),
+}))
+PY
+    )"
+    spark_args+=(
+      "--conf" "spark.task.maxFailures=1"
+      "--conf" "spark.excludeOnFailure.enabled=false"
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--partitions" "$partitions"
     )
     ;;
   *)
