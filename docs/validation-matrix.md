@@ -12,6 +12,7 @@ This matrix tracks the currently stable demo scenarios that have been validated 
 | `missing_dependency` | 2026-05-28T12:18:02Z | `DEPENDENCY_MISSING` | `DEPENDENCY_MISSING` | Pass | `.harrier-demo/validation/missing_dependency-20260528T121802Z.json` | Client-mode dependency signal was read from step stdout/stderr. |
 | `s3_access_denied` | 2026-05-28T12:18:15Z | `S3_ACCESS_DENIED` | `S3_ACCESS_DENIED` | Pass | `.harrier-demo/validation/s3_access_denied-20260528T121815Z.json` | Requires cluster-mode YARN container logs; validator waits for those logs. |
 | `bad_input_data` | 2026-05-28T12:18:29Z | `BAD_INPUT_DATA` | `BAD_INPUT_DATA` | Pass | `.harrier-demo/validation/bad_input_data-20260528T121829Z.json` | Requires cluster-mode YARN container logs; produced code and runbook recommendations. |
+| `db_bad_sql_plan` | 2026-05-28T12:44:20Z | `DB_BAD_SQL_PLAN` | `DB_BAD_SQL_PLAN` | Pass | `.harrier-demo/validation/db_bad_sql_plan-20260528T124420Z.json` | First DB/SQL demo; validates SQL plan evidence and DB recommendation output. |
 
 ## Operational Notes
 

@@ -25,6 +25,7 @@ default_scenarios=(
   missing_dependency
   s3_access_denied
   bad_input_data
+  db_bad_sql_plan
 )
 
 if [[ $# -gt 0 ]]; then
