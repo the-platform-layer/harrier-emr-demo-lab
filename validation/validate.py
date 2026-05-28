@@ -17,6 +17,8 @@ Required env vars
 
 Optional env vars
   SKIP_SCENARIO_RUN   Set to 1 to skip scripts/run_scenario.sh
+  CONTEXT_FILE         Context file path for fresh scenario submission
+  RUN_ID               Run identifier for fresh scenario submission
   CLUSTER_ID          Override cluster_id read from context file
   AWS_REGION          Override region read from context file
   LOG_WAIT_TIMEOUT    Max seconds to wait for EMR logs in S3
@@ -143,15 +145,36 @@ def load_json(path: str | Path) -> dict[str, Any]:
     return json.loads(p.read_text(encoding="utf-8"))
 
 
-def run_scenario(repo_root: Path, scenario: str) -> None:
+def run_scenario(
+    repo_root: Path,
+    scenario: str,
+    *,
+    context_file: Path | None = None,
+    run_id: str | None = None,
+) -> None:
     script = repo_root / "scripts" / "run_scenario.sh"
+    env = os.environ.copy()
+    if context_file is not None:
+        env["CONTEXT_FILE"] = str(context_file)
+    if run_id is not None:
+        env["RUN_ID"] = run_id
     result = subprocess.run(
         ["bash", str(script), scenario],
         cwd=repo_root,
+        env=env,
         check=False,
     )
     if result.returncode != 0:
         raise RuntimeError(f"run_scenario.sh exited {result.returncode} for {scenario!r}")
+
+
+def _fresh_run_id() -> str:
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return f"{timestamp}-{os.getpid()}"
+
+
+def _fresh_context_file(repo_root: Path, scenario: str, run_id: str) -> Path:
+    return repo_root / ".harrier-demo" / "runs" / f"{scenario}-{run_id}.json"
 
 
 def export_context(
@@ -389,8 +412,16 @@ def main(argv: list[str] | None = None) -> int:
                 scenario_to_run = load_json(context_file).get("scenario", "happy_path")
             else:
                 scenario_to_run = "happy_path"
+        run_id = os.environ.get("RUN_ID") or _fresh_run_id()
+        if not args.context_file:
+            context_file = _fresh_context_file(repo_root, scenario_to_run, run_id)
         print(f"Submitting scenario: {scenario_to_run}")
-        run_scenario(repo_root, scenario_to_run)
+        run_scenario(
+            repo_root,
+            scenario_to_run,
+            context_file=context_file,
+            run_id=run_id,
+        )
 
     # ------------------------------------------------------------------
     # Step 2: Export investigation context (enriches with live step state)

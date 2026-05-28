@@ -11,7 +11,8 @@
 # Optional env vars:
 #   SKIP_SCENARIO_RUN  Set to 1 to validate existing context files instead of
 #                      submitting fresh EMR steps
-#   VALIDATE_PARALLEL  Set to 1 to validate suite scenarios in parallel
+#   VALIDATE_PARALLEL  Set to 1 to validate suite scenarios in parallel.
+#                      Fresh parallel runs use per-scenario context files.
 #   LOG_WAIT_TIMEOUT   Max seconds to wait for EMR logs in S3 (default: 420)
 #   LOG_POLL_INTERVAL  S3 log polling interval in seconds (default: 30)
 #   PYTHON_BIN         Python executable to use (default: python3)

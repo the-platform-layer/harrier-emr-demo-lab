@@ -11,6 +11,8 @@
 #
 # Optional env vars:
 #   SKIP_SCENARIO_RUN  Set to 1 to skip job submission and use existing context
+#   CONTEXT_FILE        Context file path for fresh scenario submission
+#   RUN_ID              Run identifier for fresh scenario submission
 #   CLUSTER_ID         Override cluster_id from context
 #   AWS_REGION         Override region from context
 #   LOG_WAIT_TIMEOUT   Max seconds to wait for EMR logs in S3 (default: 420)

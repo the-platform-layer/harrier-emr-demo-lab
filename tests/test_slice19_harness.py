@@ -24,11 +24,13 @@ from validation.harrier_client import HarrierClient, HarrierClientError
 from validation.report import format_report, print_summary, write_report
 from validation.validate import (
     _RUNNING_SIGNAL_FIELDS,
+    _fresh_context_file,
     _listing_has_log_file,
     build_mcp_request,
     load_json,
     normalize_s3_uri,
     parse_args,
+    run_scenario,
     wait_for_emr_s3_logs,
 )
 
@@ -605,6 +607,36 @@ class TestLoadJson(unittest.TestCase):
     def test_raises_for_missing_file(self) -> None:
         with self.assertRaises(FileNotFoundError):
             load_json("/nonexistent/path/file.json")
+
+
+class TestRunScenario(unittest.TestCase):
+    @patch("validation.validate.subprocess.run")
+    def test_run_scenario_passes_unique_context_and_run_id(
+        self,
+        mock_run: MagicMock,
+    ) -> None:
+        mock_run.return_value.returncode = 0
+        context_file = ROOT / ".harrier-demo" / "runs" / "data_skew-test-run.json"
+
+        run_scenario(
+            ROOT,
+            "data_skew",
+            context_file=context_file,
+            run_id="test-run",
+        )
+
+        _, kwargs = mock_run.call_args
+        self.assertEqual(kwargs["cwd"], ROOT)
+        self.assertEqual(kwargs["env"]["CONTEXT_FILE"], str(context_file))
+        self.assertEqual(kwargs["env"]["RUN_ID"], "test-run")
+
+    def test_fresh_context_file_is_scenario_scoped(self) -> None:
+        context_file = _fresh_context_file(ROOT, "data_skew", "test-run")
+
+        self.assertEqual(
+            context_file,
+            ROOT / ".harrier-demo" / "runs" / "data_skew-test-run.json",
+        )
 
 
 class TestLogWaitHelpers(unittest.TestCase):
