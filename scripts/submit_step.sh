@@ -647,12 +647,11 @@ from pathlib import Path
 step_file, scenario, run_id, *spark_args = sys.argv[1:]
 step = [
     {
+        "Type": "CUSTOM_JAR",
         "Name": f"harrier-demo-{scenario}-{run_id}",
         "ActionOnFailure": "CONTINUE",
-        "HadoopJarStep": {
-            "Jar": "command-runner.jar",
-            "Args": spark_args,
-        },
+        "Jar": "command-runner.jar",
+        "Args": spark_args,
     }
 ]
 Path(step_file).write_text(json.dumps(step, indent=2) + "\n", encoding="utf-8")
