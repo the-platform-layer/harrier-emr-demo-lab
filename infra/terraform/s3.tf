@@ -111,3 +111,12 @@ resource "aws_s3_bucket_versioning" "logs" {
     status = "Enabled"
   }
 }
+
+# Spark requires the event log directory to exist before it can write to it.
+resource "aws_s3_object" "spark_event_logs_prefix" {
+  bucket  = aws_s3_bucket.logs.id
+  key     = "spark-event-logs/"
+  content = ""
+
+  depends_on = [aws_s3_bucket_versioning.logs]
+}
