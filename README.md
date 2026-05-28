@@ -97,6 +97,23 @@ Slice 10 controlled failure demos:
 
 The runner writes context to `.harrier-demo/last-context.json` for each run. Use `./scripts/cleanup_scenario.sh <scenario>` to remove demo S3 artifacts and cancel an active step when possible.
 
+Slice 14 advanced demos:
+
+```bash
+./scripts/run_scenario.sh data_skew
+./scripts/run_scenario.sh shuffle_spill
+./scripts/run_scenario.sh kms_access_denied
+./scripts/run_scenario.sh hdfs_full
+./scripts/run_scenario.sh db_connection_failure
+./scripts/run_scenario.sh db_lock_timeout
+./scripts/run_scenario.sh db_partition_hotspot
+./scripts/run_scenario.sh db_large_join_spill
+./scripts/run_scenario.sh db_bad_sql_plan
+./scripts/run_scenario.sh livy_session_failure
+```
+
+The DB and Livy failure scenarios are safe simulations by default. They emit diagnostic evidence without mutating a database, KMS policy, IAM policy, Livy server, HDFS, or local disks.
+
 ## Destroy
 
 ```bash

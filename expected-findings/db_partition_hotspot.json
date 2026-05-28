@@ -1,6 +1,20 @@
 {
-  "root_cause_category": "DB_PARTITION_HOTSPOT",
+  "scenario": "db_partition_hotspot",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DB_PARTITION_HOTSPOT",
+  "acceptable_related_categories": [
+    "RUNNING_JOB_DB_DELAY",
+    "DB_QUERY_PERFORMANCE"
+  ],
   "recommendation_type": "DB",
-  "pr_ready": true
+  "pr_ready": true,
+  "expected_evidence": [
+    "Spark logs include JDBC partitionColumn, lowerBound, upperBound, numPartitions, or partition hotspot",
+    "One generated partition/range dominates the workload",
+    "Read-only DB diagnostics can corroborate row distribution"
+  ],
+  "expected_recommendations": [
+    "Fix Spark JDBC partition column, bounds, and numPartitions",
+    "Add predicate pushdown or reviewed DB partition/index changes when justified"
+  ]
 }
-

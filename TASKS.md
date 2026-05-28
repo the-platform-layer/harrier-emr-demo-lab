@@ -146,7 +146,7 @@ Done when:
 
 ## Slice 14: Demo Scenarios Batch 2
 
-Status: Not started
+Status: Implemented
 
 Goal: implement advanced demo scenarios.
 
@@ -168,48 +168,48 @@ Scenarios:
 
 Tasks for each scenario:
 
-- [ ] Implement job or simulator.
-- [ ] Add scenario config if needed.
-- [ ] Mark each scenario with intended Spark deploy mode.
-- [ ] Add `run_scenario.sh` entry.
-- [ ] Add expected finding JSON.
-- [ ] Add cleanup behavior.
-- [ ] Document how to run.
-- [ ] Document expected evidence.
+- [x] Implement job or simulator.
+- [x] Add scenario config if needed.
+- [x] Mark each scenario with intended Spark deploy mode.
+- [x] Add `run_scenario.sh` entry.
+- [x] Add expected finding JSON.
+- [x] Add cleanup behavior.
+- [x] Document how to run.
+- [x] Document expected evidence.
 
 Scenario-specific tasks:
 
-- [ ] `data_skew`: generate skewed keys and long-tail task evidence.
-- [ ] `shuffle_spill`: generate heavy shuffle/spill evidence.
+- [x] `data_skew`: generate skewed keys and long-tail task evidence.
+- [x] `shuffle_spill`: generate heavy shuffle/spill evidence.
 - [x] `long_running_data_delay`: leave a Spark job running long enough to show active stage/task skew, spill, or oversized partition evidence before failure.
 - [x] `long_running_resource_delay`: leave a Spark job running with pending containers, saturated executors, or cluster capacity pressure before failure.
 - [x] `long_running_db_delay`: leave a Spark/JDBC job running while read-only DB diagnostics show active query wait, bad plan, or large scan/join delay.
-- [ ] `kms_access_denied`: configure demo KMS denial safely.
-- [ ] `hdfs_full`: simulate storage pressure safely.
-- [ ] `db_connection_failure`: enable optional PostgreSQL demo path.
-- [ ] `db_lock_timeout`: add safe lock simulator.
-- [ ] `db_partition_hotspot`: simulate poor JDBC partitioning over large DB chunks.
-- [ ] `db_large_join_spill`: simulate expensive large join / missing index diagnostics.
-- [ ] `db_bad_sql_plan`: simulate a failed or inefficient SQL plan used by Spark/JDBC.
-- [ ] `livy_session_failure`: produce Livy session failure evidence.
+- [x] `kms_access_denied`: configure demo KMS denial safely.
+- [x] `hdfs_full`: simulate storage pressure safely.
+- [x] `db_connection_failure`: enable optional PostgreSQL demo path.
+- [x] `db_lock_timeout`: add safe lock simulator.
+- [x] `db_partition_hotspot`: simulate poor JDBC partitioning over large DB chunks.
+- [x] `db_large_join_spill`: simulate expensive large join / missing index diagnostics.
+- [x] `db_bad_sql_plan`: simulate a failed or inefficient SQL plan used by Spark/JDBC.
+- [x] `livy_session_failure`: produce Livy session failure evidence.
 
 DB performance scenario tasks:
 
-- [ ] Add seed data large enough to make partitioning/join behavior visible but still demo-safe.
-- [ ] Add PostgreSQL diagnostic SQL for read-only troubleshooting.
-- [ ] Add running DB query capture path for `long_running_db_delay`.
-- [ ] Add optional migration SQL examples for recommended fixes.
-- [ ] Add rollback SQL examples where applicable.
-- [ ] Add an `EXPLAIN (FORMAT JSON)` capture path for `db_bad_sql_plan`.
-- [ ] Ensure MCP recommendations are PR suggestions only and never direct DB changes.
+- [x] Add seed data large enough to make partitioning/join behavior visible but still demo-safe.
+- [x] Add PostgreSQL diagnostic SQL for read-only troubleshooting.
+- [x] Add running DB query capture path for `long_running_db_delay`.
+- [x] Add optional migration SQL examples for recommended fixes.
+- [x] Add rollback SQL examples where applicable.
+- [x] Add an `EXPLAIN (FORMAT JSON)` capture path for `db_bad_sql_plan`.
+- [x] Ensure MCP recommendations are PR suggestions only and never direct DB changes.
 
 Done when:
 
-- [ ] Each scenario is reproducible.
-- [ ] Advanced scenarios include both client-mode and cluster-mode log layout coverage.
-- [ ] Each scenario has expected finding JSON.
-- [ ] Cleanup restores demo state.
-- [ ] Harrier detects each scenario or records known evidence gaps.
+- [x] Each scenario is reproducible.
+- [x] Advanced scenarios include both client-mode and cluster-mode log layout coverage.
+- [x] Each scenario has expected finding JSON.
+- [x] Cleanup restores demo state.
+- [x] Harrier detects each scenario or records known evidence gaps.
 
 ## Slice 19: Scenario Validation Harness
 

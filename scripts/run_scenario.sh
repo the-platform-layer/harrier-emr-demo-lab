@@ -11,6 +11,9 @@ repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 
 case "$scenario" in
   happy_path | executor_oom | driver_oom | missing_dependency | s3_access_denied | bad_input_data | \
+    data_skew | shuffle_spill | kms_access_denied | hdfs_full | db_connection_failure | \
+    db_lock_timeout | db_partition_hotspot | db_large_join_spill | db_bad_sql_plan | \
+    livy_session_failure | \
     long_running_data_delay | long_running_resource_delay | long_running_db_delay)
     SCENARIO="$scenario" "$repo_root/scripts/submit_step.sh"
     ;;

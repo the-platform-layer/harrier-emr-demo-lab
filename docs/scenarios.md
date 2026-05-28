@@ -147,6 +147,96 @@ Advanced scenarios:
 - `db_bad_sql_plan`
 - `livy_session_failure`
 
+Run any advanced scenario with:
+
+```bash
+./scripts/run_scenario.sh data_skew
+./scripts/run_scenario.sh shuffle_spill
+./scripts/run_scenario.sh kms_access_denied
+./scripts/run_scenario.sh hdfs_full
+./scripts/run_scenario.sh db_connection_failure
+./scripts/run_scenario.sh db_lock_timeout
+./scripts/run_scenario.sh db_partition_hotspot
+./scripts/run_scenario.sh db_large_join_spill
+./scripts/run_scenario.sh db_bad_sql_plan
+./scripts/run_scenario.sh livy_session_failure
+```
+
+`db_connection_failure`, `db_lock_timeout`, and `livy_session_failure` default to client deploy mode. Other advanced failures default to cluster mode. Set `DEPLOY_MODE=client` or `DEPLOY_MODE=cluster` to override either default.
+
+Clean up a run with:
+
+```bash
+./scripts/cleanup_scenario.sh <scenario>
+```
+
+## Advanced Spark, IAM, Storage, And Livy Scenarios
+
+### `data_skew`
+
+Generates one hot key and many cold keys so Harrier can identify skew ratio, hot partition, and long-tail task evidence.
+
+Expected evidence:
+
+- Spark logs include data skew, skew ratio, hot partition, or long-tail task wording.
+- Diagnostic signals include the generated skew ratio.
+
+Expected recommendation:
+
+- Repartition or salt skewed keys, filter earlier, tune shuffle partitions, or change join strategy.
+
+### `shuffle_spill`
+
+Runs a bounded wide aggregation and emits memory/disk spill evidence.
+
+Expected evidence:
+
+- Spark logs include shuffle spill, memory bytes spilled, or disk bytes spilled.
+- Diagnostic signals include shuffle spill volume.
+
+Expected recommendation:
+
+- Tune shuffle partitions, executor memory overhead, and wide-stage data volume.
+
+### `kms_access_denied`
+
+Emits a safe KMS decrypt denial for an encrypted demo S3 path without changing KMS policy.
+
+Expected evidence:
+
+- Logs include `AccessDeniedException` and `kms:Decrypt`.
+- Diagnostic signals include the encrypted input path and demo KMS key ARN.
+
+Expected recommendation:
+
+- Review key policy, S3 encryption settings, and least-privilege KMS grants for the EMR runtime role.
+
+### `hdfs_full`
+
+Simulates HDFS/local storage pressure without writing filler files.
+
+Expected evidence:
+
+- Logs include `No space left on device` or `local dirs are full`.
+- Diagnostic signals include the local storage path.
+
+Expected recommendation:
+
+- Clean temporary data, increase storage capacity, and review shuffle spill or HDFS utilization.
+
+### `livy_session_failure`
+
+Produces client-mode Livy session failure evidence for session startup and batch submission failures.
+
+Expected evidence:
+
+- Step/controller/Livy-style logs include `Livy session failed`.
+- Run context uses client deploy mode unless overridden.
+
+Expected recommendation:
+
+- Check Livy service health, session limits, Spark startup logs, and dependency bootstrap.
+
 ## Long-Running Job Scenarios
 
 These scenarios are investigated while the EMR step or YARN application is still running. The goal is to show that Harrier can explain delay before a terminal failure exists.
@@ -217,6 +307,45 @@ Expected recommendation:
 - Prepare a PR with SQL migration, rollback SQL, or Spark JDBC code/config changes where safe.
 
 ## DB Performance Scenarios
+
+### `db_connection_failure`
+
+Simulates a Spark/JDBC connection failure against an unreachable demo JDBC URL.
+
+Run:
+
+```bash
+./scripts/run_scenario.sh db_connection_failure
+```
+
+Expected evidence:
+
+- Driver logs include `PSQLException`, `JDBC`, and `connection refused`.
+- Diagnostic signals include the JDBC URL host.
+
+Expected recommendation:
+
+- Validate endpoint, DNS, route, security group, credentials, and connection limits.
+
+### `db_lock_timeout`
+
+Simulates a PostgreSQL lock wait timeout. The helper `db/lock_simulator.py` can print matching local diagnostic evidence without connecting to a DB.
+
+Run:
+
+```bash
+./scripts/run_scenario.sh db_lock_timeout
+python3 db/lock_simulator.py
+```
+
+Expected evidence:
+
+- Driver logs include lock timeout, waiting for lock, or blocked by pid.
+- Optional simulator output matches the same evidence shape.
+
+Expected recommendation:
+
+- Use read-only DB diagnostics to identify blockers and review transaction scope or retry behavior.
 
 ### `db_partition_hotspot`
 

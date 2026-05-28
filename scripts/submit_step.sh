@@ -12,7 +12,7 @@ if [[ -n "${DEPLOY_MODE:-}" ]]; then
   deploy_mode="$DEPLOY_MODE"
 else
   case "$scenario" in
-    driver_oom | missing_dependency)
+    driver_oom | missing_dependency | db_connection_failure | db_lock_timeout | livy_session_failure)
       deploy_mode="client"
       ;;
     *)
@@ -248,6 +248,285 @@ PY
       "--input" "$data_s3_uri"
       "--output" "$output_s3_uri"
       "--run-id" "$run_id"
+    )
+    ;;
+  data_skew)
+    expected_outcome="failed"
+    partitions="${PARTITIONS:-24}"
+    hot_rows="${HOT_ROWS:-100000}"
+    cold_rows="${COLD_ROWS:-1000}"
+    hot_sleep_seconds="${HOT_PARTITION_SLEEP_SECONDS:-30}"
+    diagnostic_signals_json="$(
+      python3 - "$hot_rows" "$cold_rows" <<'PY'
+import json
+import sys
+
+hot_rows = int(sys.argv[1])
+cold_rows = int(sys.argv[2])
+skew_ratio = max(1, hot_rows // max(cold_rows, 1))
+print(json.dumps({
+    "root_cause_hint": "DATA_SKEW",
+    "skew_ratio": skew_ratio,
+    "log_signal": f"data skew detected; skew ratio {skew_ratio}; hot partition; long-tail task",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--partitions" "$partitions"
+      "--hot-rows" "$hot_rows"
+      "--cold-rows" "$cold_rows"
+      "--hot-partition-sleep-seconds" "$hot_sleep_seconds"
+    )
+    ;;
+  shuffle_spill)
+    expected_outcome="failed"
+    shuffle_rows="${SHUFFLE_ROWS:-50000}"
+    shuffle_keys="${SHUFFLE_KEYS:-64}"
+    payload_bytes="${SHUFFLE_PAYLOAD_BYTES:-256}"
+    shuffle_partitions="${SHUFFLE_PARTITIONS:-8}"
+    diagnostic_signals_json="$(
+      python3 - "$shuffle_partitions" <<'PY'
+import json
+import sys
+
+partitions = int(sys.argv[1])
+print(json.dumps({
+    "root_cause_hint": "SHUFFLE_SPILL",
+    "shuffle_partitions": partitions,
+    "shuffle_spill_mb": 2048,
+    "log_signal": "shuffle spill detected; memory bytes spilled and disk bytes spilled",
+}))
+PY
+    )"
+    spark_args+=(
+      "--conf" "spark.sql.shuffle.partitions=$shuffle_partitions"
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--rows" "$shuffle_rows"
+      "--keys" "$shuffle_keys"
+      "--payload-bytes" "$payload_bytes"
+      "--shuffle-partitions" "$shuffle_partitions"
+    )
+    ;;
+  kms_access_denied)
+    expected_outcome="failed"
+    encrypted_input="${ENCRYPTED_INPUT_URI:-s3://$raw_bucket/encrypted/kms_access_denied/$run_id/input.parquet}"
+    kms_key_arn="${KMS_KEY_ARN:-arn:aws:kms:$region:111122223333:key/demo-denied}"
+    data_s3_uri="$encrypted_input"
+    diagnostic_signals_json="$(
+      python3 - "$encrypted_input" "$kms_key_arn" <<'PY'
+import json
+import sys
+
+uri, key_arn = sys.argv[1:]
+print(json.dumps({
+    "root_cause_hint": "KMS_ACCESS_DENIED",
+    "encrypted_input_uri": uri,
+    "kms_key_arn": key_arn,
+    "log_signal": f"AccessDeniedException calling kms:Decrypt for encrypted S3 data {uri}",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--encrypted-input" "$encrypted_input"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--key-arn" "$kms_key_arn"
+    )
+    ;;
+  hdfs_full)
+    expected_outcome="failed"
+    local_dir="${HDFS_FULL_LOCAL_DIR:-/mnt/var/lib/hadoop/tmp/harrier-demo-$run_id}"
+    diagnostic_signals_json="$(
+      python3 - "$local_dir" <<'PY'
+import json
+import sys
+
+local_dir = sys.argv[1]
+print(json.dumps({
+    "root_cause_hint": "HDFS_FULL",
+    "local_dir": local_dir,
+    "log_signal": f"No space left on device in HDFS; local dirs are full at {local_dir}",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--local-dir" "$local_dir"
+    )
+    ;;
+  db_connection_failure)
+    expected_outcome="failed"
+    jdbc_url="${JDBC_URL:-jdbc:postgresql://harrier-demo-unreachable.invalid:5432/harrier_demo}"
+    diagnostic_signals_json="$(
+      python3 - "$jdbc_url" <<'PY'
+import json
+import sys
+
+jdbc_url = sys.argv[1]
+print(json.dumps({
+    "root_cause_hint": "DB_CONNECTION_FAILURE",
+    "jdbc_url": jdbc_url,
+    "log_signal": f"PSQLException JDBC connection refused for database host in {jdbc_url}",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--jdbc-url" "$jdbc_url"
+    )
+    ;;
+  db_lock_timeout)
+    expected_outcome="failed"
+    relation="${DB_LOCK_RELATION:-demo_orders}"
+    lock_seconds="${DB_LOCK_SECONDS:-120}"
+    diagnostic_signals_json="$(
+      python3 - "$relation" "$lock_seconds" <<'PY'
+import json
+import sys
+
+relation = sys.argv[1]
+lock_seconds = int(sys.argv[2])
+print(json.dumps({
+    "root_cause_hint": "DB_LOCK_TIMEOUT",
+    "relation": relation,
+    "lock_seconds": lock_seconds,
+    "log_signal": (
+        f"PostgreSQL lock timeout waiting for lock on relation {relation}; "
+        f"blocked by pid after {lock_seconds} seconds"
+    ),
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--relation" "$relation"
+      "--lock-seconds" "$lock_seconds"
+    )
+    ;;
+  db_partition_hotspot)
+    expected_outcome="failed"
+    partition_column="${DB_PARTITION_COLUMN:-customer_id}"
+    lower_bound="${DB_LOWER_BOUND:-1}"
+    upper_bound="${DB_UPPER_BOUND:-1000000}"
+    num_partitions="${DB_NUM_PARTITIONS:-1}"
+    dominant_range_rows="${DB_DOMINANT_RANGE_ROWS:-250000}"
+    diagnostic_signals_json="$(
+      python3 - "$partition_column" "$num_partitions" "$lower_bound" "$upper_bound" <<'PY'
+import json
+import sys
+
+partition_column, num_partitions, lower_bound, upper_bound = sys.argv[1:]
+print(json.dumps({
+    "root_cause_hint": "DB_PARTITION_HOTSPOT",
+    "partition_column": partition_column,
+    "num_partitions": int(num_partitions),
+    "lower_bound": int(lower_bound),
+    "upper_bound": int(upper_bound),
+    "log_signal": (
+        f"JDBC partitionColumn {partition_column} has numPartitions={num_partitions} "
+        f"lowerBound={lower_bound} upperBound={upper_bound}; partition hotspot"
+    ),
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--partition-column" "$partition_column"
+      "--lower-bound" "$lower_bound"
+      "--upper-bound" "$upper_bound"
+      "--num-partitions" "$num_partitions"
+      "--dominant-range-rows" "$dominant_range_rows"
+    )
+    ;;
+  db_large_join_spill)
+    expected_outcome="failed"
+    fact_rows="${DB_FACT_ROWS:-100000}"
+    dim_rows="${DB_DIM_ROWS:-20000}"
+    join_keys="${DB_JOIN_KEYS:-100}"
+    diagnostic_signals_json="$(
+      python3 - "$fact_rows" "$dim_rows" "$join_keys" <<'PY'
+import json
+import sys
+
+fact_rows, dim_rows, join_keys = (int(value) for value in sys.argv[1:])
+print(json.dumps({
+    "root_cause_hint": "DB_LARGE_JOIN_SPILL",
+    "fact_rows": fact_rows,
+    "dim_rows": dim_rows,
+    "join_keys": join_keys,
+    "db_plan_summary": "hash join spill to temp file; missing join-key index",
+    "log_signal": "Large join caused hash join spill to temp file and work_mem pressure",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--fact-rows" "$fact_rows"
+      "--dim-rows" "$dim_rows"
+      "--join-keys" "$join_keys"
+    )
+    ;;
+  db_bad_sql_plan)
+    expected_outcome="failed"
+    query_name="${DB_QUERY_NAME:-demo_orders_customer_join}"
+    diagnostic_signals_json="$(
+      python3 - "$query_name" <<'PY'
+import json
+import sys
+
+query_name = sys.argv[1]
+print(json.dumps({
+    "root_cause_hint": "DB_BAD_SQL_PLAN",
+    "query_name": query_name,
+    "db_plan_summary": "sequential scan and nested loop bad join order",
+    "log_signal": "EXPLAIN JSON shows sequential scan and nested loop bad join order",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--query-name" "$query_name"
+    )
+    ;;
+  livy_session_failure)
+    expected_outcome="failed"
+    livy_session_id="${LIVY_SESSION_ID:-demo-livy-session}"
+    diagnostic_signals_json="$(
+      python3 - "$livy_session_id" <<'PY'
+import json
+import sys
+
+session_id = sys.argv[1]
+print(json.dumps({
+    "root_cause_hint": "LIVY_SESSION_FAILURE",
+    "session_id": session_id,
+    "log_signal": f"Livy session failed while starting Spark batch for {session_id}",
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--session-id" "$livy_session_id"
     )
     ;;
   long_running_data_delay)

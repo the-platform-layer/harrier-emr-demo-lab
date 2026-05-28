@@ -1,0 +1,17 @@
+{
+  "scenario": "long_running_db_delay",
+  "slice": 14,
+  "job": "spark-jobs/long_running_db_delay/job.py",
+  "intended_deploy_mode": "cluster",
+  "expected_outcome": "running",
+  "expected_root_cause_category": "RUNNING_JOB_DB_DELAY",
+  "cleanup_scope": [
+    "uploaded job object",
+    "scenario output prefix",
+    "run context"
+  ],
+  "safety": [
+    "requires DB_SECRET_ID or JDBC_URL",
+    "uses read-only delay query pattern"
+  ]
+}

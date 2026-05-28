@@ -1,4 +1,16 @@
 {
-  "root_cause_category": "LIVY_SESSION_FAILURE"
+  "scenario": "livy_session_failure",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "LIVY_SESSION_FAILURE",
+  "recommendation_type": "RUNBOOK",
+  "pr_ready": false,
+  "expected_evidence": [
+    "Controller, step, or Livy-style log contains Livy session failed while starting Spark batch",
+    "Run context uses client deploy mode unless overridden",
+    "No real Livy server is mutated by the scenario"
+  ],
+  "expected_recommendations": [
+    "Check Livy service health, session limits, Spark startup logs, and dependency bootstrap",
+    "Retry session creation only after the underlying startup failure is understood"
+  ]
 }
-

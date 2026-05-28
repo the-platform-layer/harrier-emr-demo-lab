@@ -16,6 +16,22 @@ Slice 10 expected findings cover:
 
 Each file includes the expected outcome, primary root-cause category, evidence strings Harrier should find, and recommendation type.
 
+Slice 14 expected findings cover advanced Spark, IAM/KMS, storage, DB, and Livy scenarios:
+
+- `data_skew`
+- `shuffle_spill`
+- `kms_access_denied`
+- `hdfs_full`
+- `db_connection_failure`
+- `db_lock_timeout`
+- `db_partition_hotspot`
+- `db_large_join_spill`
+- `db_bad_sql_plan`
+- `livy_session_failure`
+- `long_running_data_delay`
+- `long_running_resource_delay`
+- `long_running_db_delay`
+
 Long-running scenarios should be validated before the Spark step fails. They should assert that Harrier returns a delay explanation, current running state, and whether the likely cause is data, resource, or DB-side work.
 
 DB performance scenarios should also assert `recommendation_type=DB` and `pr_ready=true` when Harrier can produce a reviewed SQL or Spark-code remediation.

@@ -1,0 +1,17 @@
+{
+  "scenario": "long_running_resource_delay",
+  "slice": 14,
+  "job": "spark-jobs/long_running_resource_delay/job.py",
+  "intended_deploy_mode": "cluster",
+  "expected_outcome": "running",
+  "expected_root_cause_category": "RUNNING_JOB_RESOURCE_DELAY",
+  "cleanup_scope": [
+    "uploaded job object",
+    "scenario output prefix",
+    "run context"
+  ],
+  "safety": [
+    "bounded task sleep delay",
+    "cleanup can cancel the active EMR step"
+  ]
+}

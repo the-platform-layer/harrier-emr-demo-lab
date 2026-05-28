@@ -1,4 +1,16 @@
 {
-  "root_cause_category": "DB_LOCK_TIMEOUT"
+  "scenario": "db_lock_timeout",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DB_LOCK_TIMEOUT",
+  "recommendation_type": "DB",
+  "pr_ready": false,
+  "expected_evidence": [
+    "Driver log contains lock timeout, waiting for lock, or blocked by pid",
+    "Optional lock simulator output matches the Spark job diagnostic signal",
+    "No real database lock is held by default"
+  ],
+  "expected_recommendations": [
+    "Use read-only DB diagnostics to identify blockers",
+    "Review transaction scope, isolation, retry behavior, and lock timeout settings"
+  ]
 }
-

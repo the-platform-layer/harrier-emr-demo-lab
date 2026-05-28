@@ -1,6 +1,20 @@
 {
-  "root_cause_category": "DB_BAD_SQL_PLAN",
+  "scenario": "db_bad_sql_plan",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DB_BAD_SQL_PLAN",
+  "acceptable_related_categories": [
+    "DB_MISSING_INDEX",
+    "DB_QUERY_PERFORMANCE"
+  ],
   "recommendation_type": "DB",
-  "pr_ready": true
+  "pr_ready": true,
+  "expected_evidence": [
+    "Log output includes EXPLAIN JSON evidence",
+    "Plan evidence shows sequential scan, nested loop, bad join order, or stale statistics",
+    "The failing query name is included in diagnostic signals"
+  ],
+  "expected_recommendations": [
+    "Rewrite the SQL for predicate pushdown or better join shape",
+    "Prepare reviewed index/statistics migration and rollback SQL where safe"
+  ]
 }
-

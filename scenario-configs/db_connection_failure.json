@@ -1,0 +1,17 @@
+{
+  "scenario": "db_connection_failure",
+  "slice": 14,
+  "job": "spark-jobs/db_connection_failure/job.py",
+  "intended_deploy_mode": "client",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DB_CONNECTION_FAILURE",
+  "cleanup_scope": [
+    "uploaded job object",
+    "scenario output prefix",
+    "run context"
+  ],
+  "safety": [
+    "uses an unreachable demo JDBC URL by default",
+    "does not mutate database state"
+  ]
+}

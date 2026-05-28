@@ -1,4 +1,19 @@
 {
-  "root_cause_category": "HDFS_FULL"
+  "scenario": "hdfs_full",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "HDFS_FULL",
+  "acceptable_related_categories": [
+    "RUNNING_JOB_RESOURCE_DELAY"
+  ],
+  "recommendation_type": "CLUSTER",
+  "pr_ready": false,
+  "expected_evidence": [
+    "Spark logs include no space left on device or HDFS local dirs are full",
+    "Run context diagnostic signals include the local storage path",
+    "The scenario simulates storage pressure without filling real disks"
+  ],
+  "expected_recommendations": [
+    "Clean temporary data or increase storage capacity",
+    "Review shuffle spill volume and HDFS utilization before rerun"
+  ]
 }
-

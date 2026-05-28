@@ -1,4 +1,20 @@
 {
-  "root_cause_category": "DATA_SKEW"
+  "scenario": "data_skew",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DATA_SKEW",
+  "acceptable_related_categories": [
+    "RUNNING_JOB_DATA_DELAY",
+    "SHUFFLE_SPILL"
+  ],
+  "recommendation_type": "SPARK_CONFIG",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Spark logs include data skew, skew ratio, hot partition, or long-tail task evidence",
+    "One generated key dominates the partition or aggregation workload",
+    "Run context diagnostic signals include a skew ratio"
+  ],
+  "expected_recommendations": [
+    "Repartition or salt skewed keys",
+    "Filter earlier, tune shuffle partitions, or change join strategy"
+  ]
 }
-

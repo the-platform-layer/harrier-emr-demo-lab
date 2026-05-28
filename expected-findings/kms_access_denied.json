@@ -1,4 +1,16 @@
 {
-  "root_cause_category": "KMS_ACCESS_DENIED"
+  "scenario": "kms_access_denied",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "KMS_ACCESS_DENIED",
+  "recommendation_type": "KMS",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Driver or executor log contains AccessDeniedException for kms:Decrypt",
+    "The encrypted S3 path and demo KMS key ARN are included in diagnostic signals",
+    "No shared KMS key policy is changed by the scenario"
+  ],
+  "expected_recommendations": [
+    "Grant least-privilege kms:Decrypt access to the EMR runtime role for the demo key",
+    "Validate S3 encryption settings, key policy, and IAM role permissions"
+  ]
 }
-

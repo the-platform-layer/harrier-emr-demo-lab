@@ -1,4 +1,16 @@
 {
-  "root_cause_category": "DB_CONNECTION_FAILURE"
+  "scenario": "db_connection_failure",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DB_CONNECTION_FAILURE",
+  "recommendation_type": "DB",
+  "pr_ready": false,
+  "expected_evidence": [
+    "Driver log contains PSQLException or JDBC connection refused",
+    "Run context diagnostic signals include the JDBC URL host",
+    "No real DB mutation occurs"
+  ],
+  "expected_recommendations": [
+    "Validate DB endpoint, security group, route, DNS, credentials, and connection limits",
+    "Use Secrets Manager for credentials and avoid plaintext JDBC passwords"
+  ]
 }
-

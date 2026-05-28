@@ -1,6 +1,21 @@
 {
-  "root_cause_category": "DB_LARGE_JOIN_SPILL",
+  "scenario": "db_large_join_spill",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DB_LARGE_JOIN_SPILL",
+  "acceptable_related_categories": [
+    "SHUFFLE_SPILL",
+    "DB_MISSING_INDEX",
+    "DB_QUERY_PERFORMANCE"
+  ],
   "recommendation_type": "DB",
-  "pr_ready": true
+  "pr_ready": true,
+  "expected_evidence": [
+    "Spark or DB diagnostic logs include large join, hash join spill, temp file, or work_mem pressure",
+    "The plan summary points to a missing join-key index or excessive join volume",
+    "Optional SQL diagnostics can capture EXPLAIN evidence"
+  ],
+  "expected_recommendations": [
+    "Rewrite the join or pre-filter data",
+    "Prepare reviewed SQL migration and rollback for useful join-key indexes"
+  ]
 }
-

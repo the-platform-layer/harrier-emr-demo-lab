@@ -1,4 +1,20 @@
 {
-  "root_cause_category": "SHUFFLE_SPILL"
+  "scenario": "shuffle_spill",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "SHUFFLE_SPILL",
+  "acceptable_related_categories": [
+    "RUNNING_JOB_DATA_DELAY",
+    "DATA_SKEW"
+  ],
+  "recommendation_type": "SPARK_CONFIG",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Spark logs include shuffle spill, memory bytes spilled, or disk bytes spilled",
+    "The job performs a wide aggregation with constrained shuffle partitions",
+    "Run context diagnostic signals include shuffle spill volume"
+  ],
+  "expected_recommendations": [
+    "Tune shuffle partitions and executor memory overhead",
+    "Reduce wide-stage data volume or change join/aggregation strategy"
+  ]
 }
-

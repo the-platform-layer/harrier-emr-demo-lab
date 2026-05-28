@@ -1,0 +1,17 @@
+{
+  "scenario": "kms_access_denied",
+  "slice": 14,
+  "job": "spark-jobs/kms_access_denied/job.py",
+  "intended_deploy_mode": "cluster",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "KMS_ACCESS_DENIED",
+  "cleanup_scope": [
+    "uploaded job object",
+    "scenario output prefix",
+    "run context"
+  ],
+  "safety": [
+    "emits a demo KMS denial signal",
+    "does not update key policy or IAM"
+  ]
+}
