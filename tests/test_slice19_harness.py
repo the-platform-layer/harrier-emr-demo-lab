@@ -24,6 +24,7 @@ from validation.harrier_client import HarrierClient, HarrierClientError
 from validation.report import format_report, print_summary, write_report
 from validation.validate import (
     _RUNNING_SIGNAL_FIELDS,
+    _listing_has_log_file,
     build_mcp_request,
     load_json,
     normalize_s3_uri,
@@ -622,6 +623,14 @@ class TestLogWaitHelpers(unittest.TestCase):
         self.assertEqual(normalize_s3_uri("s3n://bucket/logs"), "s3://bucket/logs")
         self.assertEqual(normalize_s3_uri("s3a://bucket/logs"), "s3://bucket/logs")
         self.assertEqual(normalize_s3_uri("s3://bucket/logs"), "s3://bucket/logs")
+
+    def test_listing_has_log_file_handles_recursive_s3_output(self) -> None:
+        listing = (
+            "2026-01-01 00:00:00       10 "
+            "logs/j-ABC/containers/application_1_0001/container_1/stderr.gz\n"
+        )
+        self.assertTrue(_listing_has_log_file(listing, ("stderr", "stdout")))
+        self.assertFalse(_listing_has_log_file(listing, ("syslog",)))
 
     @patch("validation.validate.export_context")
     @patch("validation.validate.subprocess.check_output")

@@ -225,12 +225,23 @@ def normalize_s3_uri(uri: str) -> str:
     return uri
 
 
-def _s3_ls(uri: str, region: str) -> str:
+def _s3_ls(uri: str, region: str, *, recursive: bool = False) -> str:
+    command = ["aws", "s3", "ls", normalize_s3_uri(uri), "--region", region]
+    if recursive:
+        command.append("--recursive")
     return subprocess.check_output(
-        ["aws", "s3", "ls", normalize_s3_uri(uri), "--region", region],
+        command,
         stderr=subprocess.DEVNULL,
         text=True,
     )
+
+
+def _listing_has_log_file(listing: str, names: tuple[str, ...]) -> bool:
+    for line in listing.splitlines():
+        filename = line.rsplit(None, 1)[-1].rsplit("/", 1)[-1]
+        if any(filename.startswith(name) for name in names):
+            return True
+    return False
 
 
 def _has_step_logs(log_uri: str, cluster_id: str, step_id: str, region: str) -> bool:
@@ -239,18 +250,16 @@ def _has_step_logs(log_uri: str, cluster_id: str, step_id: str, region: str) -> 
         listing = _s3_ls(step_uri, region)
     except subprocess.CalledProcessError:
         return False
-    names = ("stderr", "stdout", "controller", "syslog")
-    return any(f" {name}" in listing for name in names)
+    return _listing_has_log_file(listing, ("stderr", "stdout", "controller", "syslog"))
 
 
 def _has_application_logs(log_uri: str, cluster_id: str, application_id: str, region: str) -> bool:
     app_uri = f"{normalize_s3_uri(log_uri).rstrip('/')}/{cluster_id}/containers/{application_id}/"
     try:
-        listing = _s3_ls(app_uri, region)
+        listing = _s3_ls(app_uri, region, recursive=True)
     except subprocess.CalledProcessError:
         return False
-    names = ("stderr", "stdout", "syslog")
-    return any(f" {name}" in listing for name in names)
+    return _listing_has_log_file(listing, ("stderr", "stdout", "syslog"))
 
 
 def wait_for_emr_s3_logs(

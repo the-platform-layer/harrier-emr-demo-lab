@@ -74,6 +74,14 @@ region="${region_override:-$(context_value region)}"
 deploy_mode="${deploy_mode_override:-$(context_value deploy_mode)}"
 log_uri="$(context_value log_uri)"
 
+normalize_s3_uri() {
+  case "$1" in
+    s3n://*) printf 's3://%s\n' "${1#s3n://}" ;;
+    s3a://*) printf 's3://%s\n' "${1#s3a://}" ;;
+    *) printf '%s\n' "$1" ;;
+  esac
+}
+
 describe_file="$(mktemp)"
 trap 'rm -f "$describe_file"' EXIT
 
@@ -97,7 +105,8 @@ find_application_id() {
     return
   fi
 
-  local log_root="${log_uri%/}"
+  local log_root
+  log_root="$(normalize_s3_uri "${log_uri%/}")"
   local filename uri match
   for filename in stdout.gz stderr.gz controller.gz syslog.gz stdout stderr controller syslog; do
     uri="$log_root/$cluster_id/steps/$step_id/$filename"
