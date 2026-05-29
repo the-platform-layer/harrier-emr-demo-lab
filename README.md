@@ -17,6 +17,7 @@ Track slice implementation tasks in [TASKS.md](TASKS.md).
 - CloudWatch metrics and alarms
 - Controlled Spark failure scenarios
 - Scenario validation against an already-running Harrier MCP endpoint
+- Optional AWS MWAA-compatible local runner on ECS Fargate for scenario orchestration
 
 ## Safety
 
@@ -113,6 +114,25 @@ Slice 14 advanced demos:
 ```
 
 The DB and Livy failure scenarios are safe simulations by default. They emit diagnostic evidence without mutating a database, KMS policy, IAM policy, Livy server, HDFS, or local disks.
+
+## Run Scenarios From MWAA Local Runner On ECS
+
+The demo lab includes an AWS MWAA-compatible local runner container deployment for ECS Fargate. It uses AWS's `aws/aws-mwaa-local-runner` image source and layers in the Harrier DAGs and scenario scripts.
+
+```bash
+./scripts/deploy_mwaa_local_runner.sh
+```
+
+After deploy:
+
+```bash
+terraform -chdir=infra/terraform output mwaa_airflow_url
+terraform -chdir=infra/terraform output mwaa_admin_password_secret_arn
+```
+
+Open the Airflow UI, log in as `admin`, and trigger `harrier_demo_run_scenario` or `harrier_demo_smoke_suite`.
+
+Details are in [docs/mwaa-local-runner.md](docs/mwaa-local-runner.md).
 
 ## Destroy
 

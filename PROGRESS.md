@@ -6,7 +6,7 @@ Detailed implementation checklists live in [TASKS.md](TASKS.md).
 
 ## Current State
 
-Status: Slice 19 complete.
+Status: Slice 20 implemented.
 
 Remote: https://github.com/the-platform-layer/harrier-emr-demo-lab
 
@@ -24,6 +24,7 @@ Last verified:
 - Local verification passed; the job has not been submitted to a live EMR cluster in this session.
 - Scenario configs and expected findings exist for Slice 10 and Slice 14.
 - Scenario validation harness is implemented: `validation/` Python package with MCP HTTP client, comparator, report writer, and CLI; `scripts/validate_scenario.sh` shell wrapper; 83 unit tests all pass.
+- AWS MWAA-compatible local runner orchestration is implemented for ECS Fargate: DAGs, image build/deploy scripts, ECR/ECS/ALB/IAM Terraform, and docs.
 - Repo contains no production MCP server implementation or MCP deployment infrastructure.
 
 ## Decisions
@@ -67,6 +68,7 @@ This repo does not own:
 | 10. Demo scenarios batch 1 | Implemented | harrier-emr-demo-lab | `executor_oom`, `driver_oom`, `missing_dependency`, `s3_access_denied`, `bad_input_data`; live EMR validation still needed. |
 | 14. Demo scenarios batch 2 | Implemented | harrier-emr-demo-lab | Advanced Spark/IAM/storage/DB/Livy and long-running delay scenarios; live EMR validation still needed. |
 | 19. Scenario validation harness | Done | harrier-emr-demo-lab | `validation/` package: MCP client, comparator, report writer, CLI; `scripts/validate_scenario.sh` wrapper; 83 unit tests pass; no live AWS calls required for tests. |
+| 20. MWAA local runner on ECS | Implemented | harrier-emr-demo-lab | AWS MWAA local-runner image source, Harrier DAG overlay, ECS Fargate service, ALB, ECR, IAM, and deploy helper. |
 
 ## Next Session Start Here
 
@@ -84,6 +86,10 @@ Recommended next task:
    scripts/validate_scenario.sh executor_oom
    ```
 7. Check the validation report in `.harrier-demo/validation/`.
+8. Deploy MWAA local runner orchestration:
+   ```bash
+   ./scripts/deploy_mwaa_local_runner.sh
+   ```
 
 ## Open Questions
 

@@ -138,6 +138,38 @@ Scenario-specific tasks:
 Done when:
 
 - [x] Each scenario is runnable.
+
+## Slice 20: MWAA Local Runner On ECS
+
+Status: Implemented, pending live ECS verification
+
+Goal: run demo scenario orchestration from an AWS MWAA-compatible local runner container on ECS Fargate.
+
+Tasks:
+
+- [x] Use AWS `aws/aws-mwaa-local-runner` as the base image source.
+- [x] Add Harrier Airflow DAGs.
+- [x] Add a manual single-scenario DAG.
+- [x] Add a smoke-suite DAG.
+- [x] Reuse existing scenario runner scripts.
+- [x] Upload Airflow scenario context JSON to S3 logs bucket.
+- [x] Add custom image build script.
+- [x] Add deploy helper that builds, pushes, and applies Terraform.
+- [x] Add ECR repository for the MWAA local runner image.
+- [x] Add ECS cluster, task definition, service, ALB, and target group.
+- [x] Add task execution role and task role.
+- [x] Pass demo EMR/S3 outputs into the Airflow container.
+- [x] Store Airflow admin password in Secrets Manager.
+- [x] Document deployment, login, DAGs, and cost controls.
+
+Done when:
+
+- [x] DAG files compile locally.
+- [x] Terraform validates.
+- [ ] Image is built and pushed to ECR.
+- [ ] ECS service reaches steady state with `mwaa_desired_count=1`.
+- [ ] Airflow UI is reachable.
+- [ ] `harrier_demo_run_scenario` can submit `happy_path`.
 - [x] Each scenario creates expected logs.
 - [x] Batch 1 includes at least one client-mode and one cluster-mode log layout.
 - [x] Each scenario has expected finding JSON.

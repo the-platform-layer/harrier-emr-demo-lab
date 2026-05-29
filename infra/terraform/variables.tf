@@ -39,8 +39,20 @@ variable "public_subnet_cidr" {
   default     = "10.42.10.0/24"
 }
 
+variable "public_subnet_secondary_cidr" {
+  description = "CIDR block for the secondary public subnet used by the MWAA local runner ALB."
+  type        = string
+  default     = "10.42.11.0/24"
+}
+
 variable "availability_zone" {
   description = "Optional availability zone for the demo subnet. Defaults to the first available zone."
+  type        = string
+  default     = null
+}
+
+variable "secondary_availability_zone" {
+  description = "Optional secondary availability zone for ALB-backed demo services. Defaults to the second available zone."
   type        = string
   default     = null
 }
@@ -114,4 +126,40 @@ variable "monthly_budget_limit_usd" {
   description = "Suggested monthly demo budget threshold used in documentation."
   type        = number
   default     = 100
+}
+
+variable "mwaa_image_tag" {
+  description = "Image tag to run for the Harrier MWAA local runner ECS service."
+  type        = string
+  default     = "latest"
+}
+
+variable "mwaa_desired_count" {
+  description = "Number of MWAA local runner ECS tasks. Defaults to 0 so baseline Terraform can apply before an image is pushed."
+  type        = number
+  default     = 0
+}
+
+variable "mwaa_task_cpu" {
+  description = "CPU units for the MWAA local runner ECS task."
+  type        = number
+  default     = 1024
+}
+
+variable "mwaa_task_memory" {
+  description = "Memory in MiB for the MWAA local runner ECS task."
+  type        = number
+  default     = 4096
+}
+
+variable "mwaa_alb_port" {
+  description = "Public ALB listener port for the MWAA local runner Airflow UI."
+  type        = number
+  default     = 8080
+}
+
+variable "mwaa_web_allowed_cidrs" {
+  description = "CIDR blocks allowed to reach the MWAA local runner Airflow UI."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
