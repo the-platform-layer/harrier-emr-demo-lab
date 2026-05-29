@@ -36,6 +36,7 @@ default_scenarios=(
   db_connection_failure
   db_lock_timeout
   db_large_join_spill
+  glue_metastore_error
   livy_session_failure
   s3_path_missing
   output_path_conflict

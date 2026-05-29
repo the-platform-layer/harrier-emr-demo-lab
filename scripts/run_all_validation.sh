@@ -17,7 +17,7 @@
 # Scenarios that run as an actual EMR step and validate the failed result:
 #   executor_oom  missing_dependency  s3_access_denied  bad_input_data
 #   hdfs_full  kms_access_denied  driver_oom  shuffle_spill  data_skew
-#   livy_session_failure  db_connection_failure
+#   livy_session_failure  db_connection_failure  glue_metastore_error
 #   s3_path_missing  output_path_conflict  schema_mismatch
 #   python_worker_crash  unknown_failure  spot_interruption
 #

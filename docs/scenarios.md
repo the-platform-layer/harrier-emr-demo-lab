@@ -145,6 +145,7 @@ Advanced scenarios:
 - `db_partition_hotspot`
 - `db_large_join_spill`
 - `db_bad_sql_plan`
+- `glue_metastore_error`
 - `livy_session_failure`
 - `unknown_failure`
 
@@ -160,11 +161,12 @@ Run any advanced scenario with:
 ./scripts/run_scenario.sh db_partition_hotspot
 ./scripts/run_scenario.sh db_large_join_spill
 ./scripts/run_scenario.sh db_bad_sql_plan
+./scripts/run_scenario.sh glue_metastore_error
 ./scripts/run_scenario.sh livy_session_failure
 ./scripts/run_scenario.sh unknown_failure
 ```
 
-`db_connection_failure`, `db_lock_timeout`, `livy_session_failure`, and `unknown_failure` default to client deploy mode. Other advanced failures default to cluster mode. Set `DEPLOY_MODE=client` or `DEPLOY_MODE=cluster` to override either default.
+`db_connection_failure`, `db_lock_timeout`, `glue_metastore_error`, `livy_session_failure`, and `unknown_failure` default to client deploy mode. Other advanced failures default to cluster mode. Set `DEPLOY_MODE=client` or `DEPLOY_MODE=cluster` to override either default.
 
 Clean up a run with:
 
@@ -415,3 +417,19 @@ Expected recommendation:
 - Rewrite the query to improve predicate pushdown or join shape.
 - Add `ANALYZE`/statistics guidance as a validation step where stale stats are suspected.
 - Prepare a PR with SQL migration, rollback SQL, and validation query.
+
+### `glue_metastore_error`
+
+Simulates a Spark job referencing a missing Glue Data Catalog or Hive metastore table.
+
+Expected evidence:
+
+- Driver logs include `Table or view not found`.
+- Logs include an `EntityNotFoundException` for a table or database in Glue Data Catalog.
+- No production table is read or modified.
+
+Expected recommendation:
+
+- Verify that the Glue database and table exist in the expected AWS region/account.
+- Check that the EMR runtime role has the required Glue Data Catalog read permissions.
+- If the job code references the wrong table, prepare a code PR that corrects the fully qualified table/database name.
