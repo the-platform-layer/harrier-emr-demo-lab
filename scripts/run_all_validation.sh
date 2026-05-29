@@ -73,11 +73,12 @@ done
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
-context_field() {
+scenario_ctx_field() {
+  local ctx_file="$1" field="$2"
   python3 -c "
 import json, sys
-data = json.load(open('$CONTEXT_FILE'))
-print(data.get('$1') or '')
+data = json.load(open('$ctx_file'))
+print(data.get('$field') or '')
 " 2>/dev/null || true
 }
 
@@ -108,6 +109,9 @@ ERRORS=()
 
 run_scenario() {
   local scenario="$1"
+  # Use a scenario-specific context file to prevent contamination from concurrent runs.
+  local ctx_file="$REPO_ROOT/.harrier-demo/runs/validation-${scenario}.json"
+
   printf "\n"
   printf "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
   printf " SCENARIO: %s\n" "$scenario"
@@ -118,30 +122,30 @@ run_scenario() {
     return
   fi
 
-  # 1. Submit
+  # 1. Submit — write context to a scenario-specific file
   printf "[1/4] Submitting step...\n"
-  if ! SCENARIO="$scenario" bash "$SCRIPT_DIR/submit_step.sh" 2>&1; then
+  if ! SCENARIO="$scenario" CONTEXT_FILE="$ctx_file" bash "$SCRIPT_DIR/submit_step.sh" 2>&1; then
     echo "  SKIP: submit_step.sh failed — scenario may not be implemented yet"
     SKIP+=("$scenario")
     return
   fi
 
-  # 2. Wait for step
+  # 2. Wait for step — read step_id from the scenario-specific file
   local step_id cluster_id region
-  step_id="$(context_field step_id)"
-  cluster_id="$(context_field cluster_id)"
-  region="$(context_field region)"
+  step_id="$(scenario_ctx_field "$ctx_file" step_id)"
+  cluster_id="$(scenario_ctx_field "$ctx_file" cluster_id)"
+  region="$(scenario_ctx_field "$ctx_file" region)"
 
   printf "[2/4] Waiting for step %s...\n" "$step_id"
   wait_for_step "$cluster_id" "$step_id" "$region"
 
-  # 3. Export context
+  # 3. Export context — enrich the scenario-specific file with live EMR data
   printf "[3/4] Exporting investigation context...\n"
-  bash "$SCRIPT_DIR/export_investigation_context.sh" 2>&1 || true
+  CONTEXT_FILE="$ctx_file" bash "$SCRIPT_DIR/export_investigation_context.sh" 2>&1 || true
 
   # 4. Wait for log aggregation
   local deploy_mode wait_s
-  deploy_mode="$(context_field deploy_mode)"
+  deploy_mode="$(scenario_ctx_field "$ctx_file" deploy_mode)"
   if [[ "$deploy_mode" == "cluster" ]]; then
     wait_s="$CLUSTER_LOG_WAIT"
   else
@@ -150,9 +154,10 @@ run_scenario() {
   printf "[4/4] Waiting %ss for log aggregation (deploy_mode=%s)...\n" "$wait_s" "$deploy_mode"
   sleep "$wait_s"
 
-  # 5. Validate
+  # 5. Validate — use the scenario-specific context file
   if python3 "$REPO_ROOT/validation/validate.py" \
       --scenario    "$scenario" \
+      --context-file "$ctx_file" \
       --skip-run \
       --mcp-url     "$MCP_URL" \
       --account-id  "$ACCOUNT_ID" 2>&1; then

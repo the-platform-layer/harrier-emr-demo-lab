@@ -63,7 +63,18 @@ def main() -> None:
                 sort_keys=True,
             )
         )
-        spark.read.schema(read_schema).option("mode", "FAILFAST").parquet(staging_path).count()
+        # Parquet FAILFAST mode is silently ignored for type mismatches; cast and check manually.
+        from pyspark.sql.functions import col
+
+        df = spark.read.parquet(staging_path)
+        null_count = df.withColumn("_amount_d", col("amount").cast("double")).filter(
+            col("_amount_d").isNull()
+        ).count()
+        if null_count > 0:
+            raise ValueError(
+                f"schema mismatch: cannot cast StringType to DoubleType in column 'amount'; "
+                f"parquet type mismatch: {null_count} row(s) failed cast"
+            )
     finally:
         spark.stop()
 
