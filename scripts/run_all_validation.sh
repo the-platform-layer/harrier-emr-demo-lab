@@ -54,6 +54,7 @@ ALL_SCENARIOS=(
   kms_access_denied
   livy_session_failure
   db_connection_failure
+  glue_metastore_error
 )
 
 # Parse arguments

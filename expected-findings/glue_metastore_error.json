@@ -1,0 +1,17 @@
+{
+  "scenario": "glue_metastore_error",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "METASTORE_ERROR",
+  "acceptable_related_categories": [],
+  "recommendation_type": "RUNBOOK",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Table or view not found in Glue Data Catalog or Hive metastore",
+    "EntityNotFoundException: table not found in database in Glue catalog",
+    "No production data is read or modified"
+  ],
+  "expected_recommendations": [
+    "Verify the table and database exist in the Glue Data Catalog",
+    "Correct the table or database reference in the Spark job"
+  ]
+}

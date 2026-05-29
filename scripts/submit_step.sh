@@ -13,7 +13,8 @@ if [[ -n "${DEPLOY_MODE:-}" ]]; then
 else
   case "$scenario" in
     driver_oom | missing_dependency | db_connection_failure | db_lock_timeout | livy_session_failure | \
-    s3_path_missing | output_path_conflict | schema_mismatch | python_worker_crash | spot_interruption)
+    s3_path_missing | output_path_conflict | schema_mismatch | python_worker_crash | spot_interruption | \
+    glue_metastore_error)
       deploy_mode="client"
       ;;
     *)
@@ -744,6 +745,36 @@ PY
       "--output" "$output_s3_uri"
       "--run-id" "$run_id"
       "--partitions" "$partitions"
+    )
+    ;;
+  glue_metastore_error)
+    expected_outcome="failed"
+    glue_database="${GLUE_DATABASE:-harrier_demo_nonexistent_db}"
+    glue_table="${GLUE_TABLE:-nonexistent_table}"
+    diagnostic_signals_json="$(
+      python3 - "$glue_database" "$glue_table" <<'PY'
+import json
+import sys
+
+database, table = sys.argv[1:]
+table_ref = f"{database}.{table}"
+print(json.dumps({
+    "root_cause_hint": "METASTORE_ERROR",
+    "glue_database": database,
+    "glue_table": table,
+    "log_signal": (
+        f"GlueMetastoreError: Table or view not found: {table_ref}; "
+        f"EntityNotFoundException: Table {table} not found in database {database} in Glue Data Catalog"
+    ),
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--database" "$glue_database"
+      "--table" "$glue_table"
     )
     ;;
   *)
