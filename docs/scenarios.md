@@ -146,6 +146,7 @@ Advanced scenarios:
 - `db_large_join_spill`
 - `db_bad_sql_plan`
 - `livy_session_failure`
+- `unknown_failure`
 
 Run any advanced scenario with:
 
@@ -160,9 +161,10 @@ Run any advanced scenario with:
 ./scripts/run_scenario.sh db_large_join_spill
 ./scripts/run_scenario.sh db_bad_sql_plan
 ./scripts/run_scenario.sh livy_session_failure
+./scripts/run_scenario.sh unknown_failure
 ```
 
-`db_connection_failure`, `db_lock_timeout`, and `livy_session_failure` default to client deploy mode. Other advanced failures default to cluster mode. Set `DEPLOY_MODE=client` or `DEPLOY_MODE=cluster` to override either default.
+`db_connection_failure`, `db_lock_timeout`, `livy_session_failure`, and `unknown_failure` default to client deploy mode. Other advanced failures default to cluster mode. Set `DEPLOY_MODE=client` or `DEPLOY_MODE=cluster` to override either default.
 
 Clean up a run with:
 
@@ -236,6 +238,21 @@ Expected evidence:
 Expected recommendation:
 
 - Check Livy service health, session limits, Spark startup logs, and dependency bootstrap.
+
+### `unknown_failure`
+
+Emits a stable sentinel that does not match any deterministic Harrier classifier rule.
+
+Expected evidence:
+
+- Logs include `HarrierUnclassifiedDemoSignal`.
+- No known classifier category should match the signal.
+
+Expected recommendation:
+
+- Keep the root cause as `UNKNOWN`.
+- Return runbook-only guidance.
+- Archive the finding if it recurs, then promote it into the rule system only after a stable signal, recommendation, MCP unit test, demo scenario, and expected findings exist.
 
 ## Long-Running Job Scenarios
 

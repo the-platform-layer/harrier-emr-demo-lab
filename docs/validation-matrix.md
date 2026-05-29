@@ -26,6 +26,7 @@ This matrix tracks the currently stable demo scenarios that have been validated 
 | `output_path_conflict` | 2026-05-29T00:48:23Z | `OUTPUT_PATH_CONFLICT` | `OUTPUT_PATH_CONFLICT` | Pass | `.harrier-demo/validation/output_path_conflict-20260529T004823Z.json` | Fresh run on cluster `j-4UGD4SUAIWMR`. |
 | `schema_mismatch` | 2026-05-29T00:48:30Z | `BAD_INPUT_DATA` | `BAD_INPUT_DATA` | Pass | `.harrier-demo/validation/schema_mismatch-20260529T004830Z.json` | Fresh run on cluster `j-4UGD4SUAIWMR`. |
 | `python_worker_crash` | 2026-05-29T00:43:23Z | `PYTHON_WORKER_CRASH` | `PYTHON_WORKER_CRASH` | Pass | `.harrier-demo/validation/python_worker_crash-20260529T004323Z.json` | Fresh run on cluster `j-4UGD4SUAIWMR`. |
+| `unknown_failure` | 2026-05-29T02:23:56Z | `UNKNOWN` | `UNKNOWN` | Pass | `.harrier-demo/validation/unknown_failure-20260529T022356Z.json` | Unknown-failure safety scenario; verifies runbook-only recommendations and no PR-ready fix. |
 | `spot_interruption` | 2026-05-29T00:33:17Z | `EXECUTOR_LOST` | `EXECUTOR_LOST` | Pass | `.harrier-demo/validation/spot_interruption-20260529T003317Z.json` | Fresh run on cluster `j-4UGD4SUAIWMR`. |
 
 ## Operational Notes

@@ -41,6 +41,7 @@ default_scenarios=(
   output_path_conflict
   schema_mismatch
   python_worker_crash
+  unknown_failure
   spot_interruption
 )
 

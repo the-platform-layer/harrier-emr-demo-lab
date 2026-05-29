@@ -19,7 +19,7 @@
 #   hdfs_full  kms_access_denied  driver_oom  shuffle_spill  data_skew
 #   livy_session_failure  db_connection_failure
 #   s3_path_missing  output_path_conflict  schema_mismatch
-#   python_worker_crash  spot_interruption
+#   python_worker_crash  unknown_failure  spot_interruption
 #
 # Running-job scenarios (require Harrier to be called mid-execution, not automated here):
 #   long_running_data_delay  long_running_resource_delay  long_running_db_delay
@@ -46,6 +46,7 @@ ALL_SCENARIOS=(
   output_path_conflict
   schema_mismatch
   python_worker_crash
+  unknown_failure
   spot_interruption
   driver_oom
   shuffle_spill

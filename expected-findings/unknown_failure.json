@@ -1,0 +1,17 @@
+{
+  "scenario": "unknown_failure",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "UNKNOWN",
+  "acceptable_related_categories": [],
+  "recommendation_type": "RUNBOOK",
+  "pr_ready": false,
+  "expected_evidence": [
+    "HarrierUnclassifiedDemoSignal sentinel marker is visible in logs",
+    "No deterministic classifier rule matches the signal",
+    "Harrier returns runbook guidance without PR-ready changes"
+  ],
+  "expected_recommendations": [
+    "Collect additional evidence before acting",
+    "Archive the unknown finding if it recurs"
+  ]
+}

@@ -14,6 +14,7 @@ else
   case "$scenario" in
     driver_oom | missing_dependency | db_connection_failure | db_lock_timeout | livy_session_failure | \
     s3_path_missing | output_path_conflict | schema_mismatch | python_worker_crash | spot_interruption | \
+    unknown_failure | \
     glue_metastore_error)
       deploy_mode="client"
       ;;
@@ -745,6 +746,32 @@ PY
       "--output" "$output_s3_uri"
       "--run-id" "$run_id"
       "--partitions" "$partitions"
+    )
+    ;;
+  unknown_failure)
+    expected_outcome="failed"
+    sentinel="${UNKNOWN_FAILURE_SENTINEL:-BLUE-QUARTZ-17}"
+    diagnostic_signals_json="$(
+      python3 - "$sentinel" <<'PY'
+import json
+import sys
+
+sentinel = sys.argv[1]
+print(json.dumps({
+    "root_cause_hint": "UNKNOWN",
+    "sentinel": sentinel,
+    "log_signal": (
+        f"HarrierUnclassifiedDemoSignal sentinel={sentinel}; "
+        "deliberately unmapped terminal condition"
+    ),
+}))
+PY
+    )"
+    spark_args+=(
+      "$job_s3_uri"
+      "--output" "$output_s3_uri"
+      "--run-id" "$run_id"
+      "--sentinel" "$sentinel"
     )
     ;;
   glue_metastore_error)
