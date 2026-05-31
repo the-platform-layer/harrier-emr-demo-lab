@@ -1,6 +1,6 @@
 # Harrier Demo Validation Matrix
 
-Last updated: 2026-05-29
+Last updated: 2026-06-01
 
 This matrix tracks the currently stable demo scenarios that have been validated against the deployed Harrier MCP endpoint.
 
@@ -35,29 +35,29 @@ This matrix tracks the currently stable demo scenarios that have been validated 
 - Use `scripts/validate_demo_suite.sh` to rerun the stable suite. Set `VALIDATE_PARALLEL=1` to validate the suite concurrently.
 - The validator waits for EMR S3 log archival before calling Harrier. This is important for cluster-mode jobs because the actionable Python exception usually lands in YARN container logs after the EMR step is already terminal.
 - For `runtime=emr_serverless`, the validator waits on `aws emr-serverless get-job-run` and sends the runtime-aware typed target to Harrier. EC2 step-log polling is skipped because Serverless log discovery happens inside the MCP runtime provider.
-- For `runtime=emr_eks`, the validator waits on `aws emr-containers describe-job-run` and sends the runtime-aware typed target to Harrier. EC2 step-log polling is skipped because EKS S3, CloudWatch, and optional Kubernetes pod discovery happen inside the MCP runtime provider.
+- For `runtime=emr_eks`, the validator waits on `aws emr-containers describe-job-run` and sends the runtime-aware typed target to Harrier. EC2 step-log polling is skipped because EKS S3, CloudWatch, and optional Kubernetes pod discovery happen inside the MCP runtime provider. For Kubernetes-first failures such as image pull and pending pods, the validator captures live pod evidence before EMR on EKS cleanup removes the pod.
 - Set `NO_LOG_WAIT=1` only when intentionally testing partial-log behavior.
 
 ## EMR Serverless Slice 30
 
-These scenarios are implemented and ready for live validation:
+These scenarios are implemented. The Slice 30 acceptance gate, one live Serverless failure through Harrier, passed with `executor_oom`. The remaining Serverless rows are optional parity validation.
 
-| Scenario | Expected Category | Runtime | Status | Notes |
-| --- | --- | --- | --- | --- |
-| `happy_path` | `UNKNOWN` | `emr_serverless` | Pending live AWS validation | Proves Serverless app, S3 input/output, and runtime target export. |
-| `executor_oom` | `EXECUTOR_OOM` | `emr_serverless` | Pending live AWS validation | Uses bounded executor allocation and Serverless driver/executor logs. |
-| `missing_dependency` | `DEPENDENCY_MISSING` | `emr_serverless` | Pending live AWS validation | Driver logs contain the absent module signal. |
-| `s3_path_missing` | `S3_PATH_MISSING` | `emr_serverless` | Pending live AWS validation | Reads a deliberately missing demo S3 prefix. |
-| `bad_input_data` | `BAD_INPUT_DATA` | `emr_serverless` | Pending live AWS validation | Uploads malformed demo CSV under the raw bucket. |
+| Scenario | Last Run Time (UTC) | Expected Category | Actual Category | Result | Report Path | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `happy_path` | - | `UNKNOWN` | - | Optional parity not run | - | Proves Serverless app, S3 input/output, and runtime target export. |
+| `executor_oom` | 2026-05-31T05:59:29Z | `EXECUTOR_OOM` | `EXECUTOR_OOM` | Pass | `.harrier-demo/validation/executor_oom-20260531T055929Z.json` | Live EMR Serverless validation on application `00g63elinhft1g29`, job run `00g63esr1juado2b`. |
+| `missing_dependency` | - | `DEPENDENCY_MISSING` | - | Optional parity not run | - | Driver logs should contain the absent module signal. |
+| `s3_path_missing` | - | `S3_PATH_MISSING` | - | Optional parity not run | - | Reads a deliberately missing demo S3 prefix. |
+| `bad_input_data` | - | `BAD_INPUT_DATA` | - | Optional parity not run | - | Uploads malformed demo CSV under the raw bucket. |
 
 ## EMR On EKS Slice 31
 
-These scenarios are implemented and ready for live validation against an existing EKS cluster:
+All Slice 31 scenarios passed live validation against the disposable EKS cluster `harrier-demo-eks`, virtual cluster `rhqipmqf1s7e37r25ftwltvt0`, and namespace `harrier-emr-jobs`.
 
-| Scenario | Expected Category | Runtime | Status | Notes |
-| --- | --- | --- | --- | --- |
-| `happy_path` | `UNKNOWN` | `emr_eks` | Pending live AWS validation | Proves virtual cluster, S3 input/output, and runtime target export. |
-| `executor_oom` | `EXECUTOR_OOM` | `emr_eks` | Pending live AWS validation | Uses bounded executor allocation and EKS driver/executor logs. |
-| `image_pull_failure` | `EKS_IMAGE_PULL_FAILURE` | `emr_eks` | Pending live AWS validation | Uses an intentionally invalid demo image tag and Kubernetes pod status. |
-| `pod_pending_resource_pressure` | `EKS_POD_PENDING` | `emr_eks` | Pending live AWS validation | Requests oversized executor resources to produce Pending or Unschedulable pod evidence. |
-| `s3_access_denied` | `S3_ACCESS_DENIED` | `emr_eks` | Pending live AWS validation | Emits an S3 access denied signal from Spark logs without mutating IAM. |
+| Scenario | Last Run Time (UTC) | Expected Category | Actual Category | Result | Report Path | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| `happy_path` | 2026-05-31T06:47:49Z | `UNKNOWN` | `UNKNOWN` | Pass | `.harrier-demo/validation/happy_path-20260531T064749Z.json` | Live EMR on EKS job run `000000037jsp1eq0dj4`; verifies no false positive on a successful Spark job. |
+| `executor_oom` | 2026-05-31T06:39:01Z | `EXECUTOR_OOM` | `EXECUTOR_OOM` | Pass | `.harrier-demo/validation/executor_oom-20260531T063901Z.json` | Live EMR on EKS job run `000000037jso19nmmgd`; uses bounded executor allocation and EKS driver/executor logs. |
+| `image_pull_failure` | 2026-05-31T23:46:47Z | `EKS_IMAGE_PULL_FAILURE` | `EKS_IMAGE_PULL_FAILURE` | Pass | `.harrier-demo/validation/image_pull_failure-20260531T234647Z.json` | Live EMR on EKS job run `000000037k0don5oufg`; uses an intentionally invalid demo image tag and live Kubernetes pod status. |
+| `pod_pending_resource_pressure` | 2026-05-31T23:49:00Z | `EKS_POD_PENDING` | `EKS_POD_PENDING` | Pass | `.harrier-demo/validation/pod_pending_resource_pressure-20260531T234900Z.json` | Live EMR on EKS job run `000000037k0e0sdk75m`; requests oversized executor resources to produce Pending or Unschedulable pod evidence. |
+| `s3_access_denied` | 2026-05-31T06:49:28Z | `S3_ACCESS_DENIED` | `S3_ACCESS_DENIED` | Pass | `.harrier-demo/validation/s3_access_denied-20260531T064928Z.json` | Live EMR on EKS job run `000000037jsp9f10kl1`; emits an S3 access denied signal from Spark logs without mutating IAM. |
