@@ -1,15 +1,51 @@
 # EMR On EKS Prerequisites
 
-Slice 31 assumes an existing EKS cluster. The demo lab registers one namespace as an EMR on EKS virtual cluster and submits disposable Spark jobs into that namespace.
+Slice 31 can use an existing EKS cluster or create a disposable demo cluster. The demo lab registers one namespace as an EMR on EKS virtual cluster and submits disposable Spark jobs into that namespace.
+
+## Disposable Demo Cluster
+
+Create the demo EKS cluster, managed node group, and EMR on EKS job role:
+
+```bash
+terraform -chdir=infra/terraform apply \
+  -var enable_demo_eks_cluster=true
+```
+
+Prepare namespace access and update the job role trust policy:
+
+```bash
+./scripts/setup_eks_virtual_cluster.sh
+```
+
+Register the namespace as an EMR virtual cluster:
+
+```bash
+terraform -chdir=infra/terraform apply \
+  -var enable_demo_eks_cluster=true \
+  -var enable_emr_eks=true
+```
+
+The disposable cluster creates billable EKS and EC2 resources. Destroy it after validation:
+
+```bash
+terraform -chdir=infra/terraform destroy \
+  -var enable_demo_eks_cluster=true \
+  -var enable_emr_eks=true
+```
 
 ## Required Inputs
+
+For an existing cluster:
 
 - `EMR_EKS_CLUSTER_NAME` or Terraform variable `emr_eks_cluster_name`
 - `EMR_EKS_NAMESPACE`, default `harrier-emr-jobs`
 - `EMR_EKS_JOB_ROLE_ARN` or Terraform variable `emr_eks_job_role_arn`
+
+For the disposable demo cluster, Terraform outputs the cluster name and job role ARN.
+
 - AWS CLI access to `eks`, `emr-containers`, `s3`, and `logs`
 - `kubectl` access to create/read pods in the target namespace
-- `eksctl` is recommended for the EMR on EKS access entry setup
+- `eksctl` is optional; the setup script falls back to `kubectl` RBAC plus EKS Access Entry integration when it is not installed
 
 ## Setup Flow
 

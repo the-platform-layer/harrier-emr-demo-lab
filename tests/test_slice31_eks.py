@@ -20,16 +20,22 @@ EKS_SCENARIOS = {
 class Slice31EksTests(unittest.TestCase):
     def test_terraform_declares_virtual_cluster_and_outputs(self) -> None:
         eks_tf = (ROOT / "infra" / "terraform" / "emr-eks.tf").read_text(encoding="utf-8")
+        cluster_tf = (ROOT / "infra" / "terraform" / "eks-cluster.tf").read_text(encoding="utf-8")
         outputs_tf = (ROOT / "infra" / "terraform" / "outputs.tf").read_text(encoding="utf-8")
         variables_tf = (ROOT / "infra" / "terraform" / "variables.tf").read_text(encoding="utf-8")
 
         self.assertIn('resource "aws_emrcontainers_virtual_cluster" "demo"', eks_tf)
         self.assertIn('type = "EKS"', eks_tf)
         self.assertIn("aws_cloudwatch_log_group\" \"emr_eks", eks_tf)
+        self.assertIn('resource "aws_eks_cluster" "demo"', cluster_tf)
+        self.assertIn('resource "aws_eks_node_group" "demo"', cluster_tf)
+        self.assertIn('resource "aws_iam_role" "emr_eks_job"', cluster_tf)
         self.assertIn("enable_emr_eks", variables_tf)
+        self.assertIn("enable_demo_eks_cluster", variables_tf)
         self.assertIn("emr_eks_cluster_name", variables_tf)
         self.assertIn("emr_eks_job_role_arn", variables_tf)
         self.assertIn("emr_eks_virtual_cluster_id", outputs_tf)
+        self.assertIn("demo_eks_node_group_name", outputs_tf)
         self.assertIn("emr_eks_log_uri", outputs_tf)
 
     def test_setup_submitter_and_runner_wire_supported_scenarios(self) -> None:
@@ -38,6 +44,7 @@ class Slice31EksTests(unittest.TestCase):
         runner = (ROOT / "scripts" / "run_scenario.sh").read_text(encoding="utf-8")
 
         self.assertIn("aws eks update-kubeconfig", setup)
+        self.assertIn("kind: RoleBinding", setup)
         self.assertIn("aws emr-containers update-role-trust-policy", setup)
         self.assertIn("aws emr-containers start-job-run", submitter)
         self.assertIn("sparkSubmitJobDriver", submitter)

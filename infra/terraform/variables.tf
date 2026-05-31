@@ -104,8 +104,50 @@ variable "enable_emr_eks" {
   default     = false
 }
 
+variable "enable_demo_eks_cluster" {
+  description = "Create a disposable EKS cluster and managed node group for live EMR on EKS validation."
+  type        = bool
+  default     = false
+}
+
+variable "demo_eks_cluster_name" {
+  description = "Name for the disposable EKS cluster when enable_demo_eks_cluster is true. Defaults to <name_prefix>-eks."
+  type        = string
+  default     = ""
+}
+
+variable "demo_eks_kubernetes_version" {
+  description = "Optional Kubernetes version for the disposable EKS cluster. Leave empty to use the AWS default supported version."
+  type        = string
+  default     = ""
+}
+
+variable "demo_eks_node_instance_types" {
+  description = "Instance types for the disposable EKS managed node group."
+  type        = list(string)
+  default     = ["m5.xlarge"]
+}
+
+variable "demo_eks_node_desired_size" {
+  description = "Desired node count for the disposable EKS managed node group."
+  type        = number
+  default     = 2
+}
+
+variable "demo_eks_node_min_size" {
+  description = "Minimum node count for the disposable EKS managed node group."
+  type        = number
+  default     = 1
+}
+
+variable "demo_eks_node_max_size" {
+  description = "Maximum node count for the disposable EKS managed node group."
+  type        = number
+  default     = 2
+}
+
 variable "emr_eks_cluster_name" {
-  description = "Existing EKS cluster name to register with EMR on EKS when enable_emr_eks is true."
+  description = "Existing EKS cluster name to register with EMR on EKS when enable_emr_eks is true and enable_demo_eks_cluster is false."
   type        = string
   default     = ""
 }

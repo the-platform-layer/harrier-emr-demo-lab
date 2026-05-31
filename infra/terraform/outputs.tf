@@ -71,7 +71,7 @@ output "emr_eks_virtual_cluster_id" {
 }
 
 output "emr_eks_cluster_name" {
-  value = var.emr_eks_cluster_name
+  value = local.emr_eks_cluster_name_effective
 }
 
 output "emr_eks_namespace" {
@@ -79,7 +79,19 @@ output "emr_eks_namespace" {
 }
 
 output "emr_eks_job_role_arn" {
-  value = var.emr_eks_job_role_arn
+  value = local.emr_eks_job_role_arn_effective
+}
+
+output "emr_eks_job_role_name" {
+  value = (
+    length(trimspace(var.emr_eks_job_role_arn)) > 0
+    ? element(reverse(split("/", var.emr_eks_job_role_arn)), 0)
+    : try(aws_iam_role.emr_eks_job[0].name, "")
+  )
+}
+
+output "demo_eks_node_group_name" {
+  value = try(aws_eks_node_group.demo[0].node_group_name, "")
 }
 
 output "emr_eks_release_label" {

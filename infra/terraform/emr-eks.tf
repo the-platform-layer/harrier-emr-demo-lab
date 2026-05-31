@@ -13,7 +13,7 @@ resource "aws_emrcontainers_virtual_cluster" "demo" {
   name = "${local.name_prefix}-emr-eks"
 
   container_provider {
-    id   = var.emr_eks_cluster_name
+    id   = local.emr_eks_cluster_name_effective
     type = "EKS"
 
     info {
@@ -29,8 +29,8 @@ resource "aws_emrcontainers_virtual_cluster" "demo" {
 
   lifecycle {
     precondition {
-      condition     = length(trimspace(var.emr_eks_cluster_name)) > 0
-      error_message = "emr_eks_cluster_name is required when enable_emr_eks is true."
+      condition     = length(trimspace(local.emr_eks_cluster_name_effective)) > 0
+      error_message = "emr_eks_cluster_name or enable_demo_eks_cluster is required when enable_emr_eks is true."
     }
   }
 }
