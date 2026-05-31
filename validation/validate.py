@@ -319,6 +319,86 @@ def wait_for_eks_job(
     )
 
 
+def wait_for_eks_pod_signal(
+    *,
+    namespace: str,
+    job_run_id: str,
+    expected_category: str,
+    timeout: int = 600,
+    poll_interval: int = 15,
+) -> bool:
+    """Wait for live Kubernetes pod evidence before EMR cleans up failed pods."""
+    if expected_category not in {"EKS_IMAGE_PULL_FAILURE", "EKS_POD_PENDING"}:
+        return False
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        pods = _eks_job_pods(namespace=namespace, job_run_id=job_run_id)
+        if _pods_have_expected_signal(pods, expected_category):
+            return True
+        remaining = max(0, int(deadline - time.monotonic()))
+        pod_summary = ", ".join(
+            f"{pod.get('metadata', {}).get('name', 'unknown')}:{pod.get('status', {}).get('phase', 'unknown')}"
+            for pod in pods
+        ) or "no matching pods"
+        print(
+            f"  EKS pod signal for {expected_category}: {pod_summary}. "
+            f"Waiting... ({remaining}s remaining)"
+        )
+        time.sleep(poll_interval)
+    return False
+
+
+def _eks_job_pods(*, namespace: str, job_run_id: str) -> list[dict[str, Any]]:
+    try:
+        output = subprocess.check_output(
+            ["kubectl", "get", "pods", "-n", namespace, "-o", "json"],
+            stderr=subprocess.DEVNULL,
+            text=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        return []
+    try:
+        items = json.loads(output).get("items", [])
+    except json.JSONDecodeError:
+        return []
+    return [pod for pod in items if _pod_matches_job(pod, job_run_id)]
+
+
+def _pod_matches_job(pod: dict[str, Any], job_run_id: str) -> bool:
+    metadata = pod.get("metadata", {})
+    labels = metadata.get("labels") or {}
+    annotations = metadata.get("annotations") or {}
+    haystack = " ".join(
+        [
+            str(metadata.get("name", "")),
+            *[str(item) for pair in labels.items() for item in pair],
+            *[str(item) for pair in annotations.items() for item in pair],
+        ]
+    )
+    return job_run_id in haystack
+
+
+def _pods_have_expected_signal(pods: list[dict[str, Any]], expected_category: str) -> bool:
+    for pod in pods:
+        status = pod.get("status", {})
+        if expected_category == "EKS_POD_PENDING":
+            if status.get("phase") == "Pending":
+                return True
+            for condition in status.get("conditions", []) or []:
+                if (
+                    condition.get("type") == "PodScheduled"
+                    and str(condition.get("status", "")).lower() == "false"
+                    and condition.get("reason") == "Unschedulable"
+                ):
+                    return True
+        if expected_category == "EKS_IMAGE_PULL_FAILURE":
+            for container in status.get("containerStatuses", []) or []:
+                waiting = (container.get("state") or {}).get("waiting") or {}
+                if waiting.get("reason") in {"ErrImagePull", "ImagePullBackOff"}:
+                    return True
+    return False
+
+
 def normalize_s3_uri(uri: str) -> str:
     """Normalize Hadoop S3 schemes to an aws-cli-compatible s3:// URI."""
     for legacy in ("s3n://", "s3a://"):
@@ -729,6 +809,7 @@ def main(argv: list[str] | None = None) -> int:
         return 2
     expected = load_json(expected_path)
     expected_outcome: str = expected.get("expected_outcome", "failed")
+    expected_category: str = expected.get("expected_root_cause_category", "")
 
     # ------------------------------------------------------------------
     # Step 4: Wait for terminal state (skip for running-job scenarios)
@@ -769,19 +850,36 @@ def main(argv: list[str] | None = None) -> int:
         and region
         and not args.skip_run
     ):
-        print(f"Waiting for EMR on EKS job run {job_run_id} to complete…")
-        try:
-            final_state = wait_for_eks_job(
-                virtual_cluster_id,
-                job_run_id,
-                region,
+        namespace = context.get("namespace", "")
+        if namespace and expected_category in {"EKS_IMAGE_PULL_FAILURE", "EKS_POD_PENDING"}:
+            print(f"Waiting for EKS pod diagnostic signal for job run {job_run_id}…")
+            found_signal = wait_for_eks_pod_signal(
+                namespace=namespace,
+                job_run_id=job_run_id,
+                expected_category=expected_category,
                 timeout=args.wait_timeout,
                 poll_interval=args.poll_interval,
             )
-            print(f"  EMR on EKS job state: {final_state}")
-            context = export_context(repo_root, context_file, exported_file)
-        except (TimeoutError, RuntimeError) as exc:
-            print(f"  Warning: {exc}. Proceeding with current context.")
+            if found_signal:
+                print(f"  EKS pod diagnostic signal observed: {expected_category}")
+                context = export_context(repo_root, context_file, exported_file)
+            else:
+                print("  Warning: EKS pod diagnostic signal was not observed before timeout.")
+
+        if expected_category not in {"EKS_IMAGE_PULL_FAILURE", "EKS_POD_PENDING"}:
+            print(f"Waiting for EMR on EKS job run {job_run_id} to complete…")
+            try:
+                final_state = wait_for_eks_job(
+                    virtual_cluster_id,
+                    job_run_id,
+                    region,
+                    timeout=args.wait_timeout,
+                    poll_interval=args.poll_interval,
+                )
+                print(f"  EMR on EKS job state: {final_state}")
+                context = export_context(repo_root, context_file, exported_file)
+            except (TimeoutError, RuntimeError) as exc:
+                print(f"  Warning: {exc}. Proceeding with current context.")
     elif (
         expected_outcome != "running"
         and runtime == "emr_ec2"

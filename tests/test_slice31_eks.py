@@ -52,6 +52,7 @@ class Slice31EksTests(unittest.TestCase):
         self.assertIn('"runtime": "emr_eks"', submitter)
         self.assertIn("cloudWatchMonitoringConfiguration", submitter)
         self.assertIn("s3MonitoringConfiguration", submitter)
+        self.assertIn('short_scenario="${scenario//_/-}"', submitter)
         self.assertIn("RUNTIME=\"emr_eks\"", runner)
 
         for scenario in EKS_SCENARIOS:

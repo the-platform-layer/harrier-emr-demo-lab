@@ -43,6 +43,7 @@ log_uri="${LOG_URI:-$(tf_output emr_eks_log_uri)}"
 log_uri="${log_uri:-s3://$logs_bucket/emr-eks/}"
 log_stream_prefix="${EMR_EKS_LOG_STREAM_PREFIX:-harrier-demo/$scenario/$run_id}"
 bad_image_uri="${EMR_EKS_BAD_IMAGE_URI:-$(tf_output emr_eks_bad_image_uri)}"
+bad_image_uri="${bad_image_uri:-public.ecr.aws/docker/library/busybox:not-a-real-harrier-demo-tag}"
 
 missing=()
 [[ -z "$virtual_cluster_id" ]] && missing+=("EMR_EKS_VIRTUAL_CLUSTER_ID or terraform output emr_eks_virtual_cluster_id")
@@ -316,7 +317,10 @@ if app_config:
 path.write_text(json.dumps(overrides, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 PY
 
-job_name="harrier-demo-eks-$scenario-$run_id"
+short_scenario="${scenario//_/-}"
+short_scenario="${short_scenario:0:28}"
+short_run_id="${run_id:0:18}"
+job_name="harrier-eks-$short_scenario-$short_run_id"
 job_run_id="$(
   aws emr-containers start-job-run \
     --virtual-cluster-id "$virtual_cluster_id" \
