@@ -1,0 +1,20 @@
+{
+  "scenario": "pod_pending_resource_pressure",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "EKS_POD_PENDING",
+  "acceptable_related_categories": [
+    "RUNNING_JOB_RESOURCE_DELAY"
+  ],
+  "recommendation_type": "KUBERNETES",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Kubernetes pod status includes Pending or Unschedulable",
+    "Requested executor CPU and memory are intentionally too large for the demo cluster",
+    "The failure is bounded by the EMR on EKS job-start timeout"
+  ],
+  "expected_recommendations": [
+    "Tune the EMR on EKS pod template resource requests and Spark executor sizing",
+    "Validate the change with a small non-production job before scaling the scenario",
+    "Roll back to the previous pod template or Spark resource configuration if scheduling still fails"
+  ]
+}

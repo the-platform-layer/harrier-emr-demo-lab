@@ -1,0 +1,18 @@
+{
+  "scenario": "happy_path",
+  "runtime": "emr_serverless",
+  "slice": 30,
+  "job": "spark-jobs/happy_path/job.py",
+  "expected_findings": "expected-findings/happy_path.json",
+  "expected_outcome": "success",
+  "expected_root_cause_category": "UNKNOWN",
+  "log_backends": [
+    "s3",
+    "cloudwatch"
+  ],
+  "safety": [
+    "uses demo EMR Serverless application only",
+    "writes input and output under demo S3 prefixes",
+    "auto-stops the application after the configured idle timeout"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "scenario": "s3_path_missing",
+  "runtime": "emr_serverless",
+  "slice": 30,
+  "job": "spark-jobs/s3_path_missing/job.py",
+  "expected_findings": "expected-findings/s3_path_missing.json",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "S3_PATH_MISSING",
+  "log_backends": [
+    "s3",
+    "cloudwatch"
+  ],
+  "safety": [
+    "uses demo EMR Serverless application only",
+    "reads a deliberately missing demo S3 prefix",
+    "does not alter S3 bucket policy"
+  ]
+}

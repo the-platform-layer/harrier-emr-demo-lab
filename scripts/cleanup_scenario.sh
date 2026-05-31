@@ -40,8 +40,13 @@ if [[ -n "$scenario" && "$context_scenario" != "$scenario" ]]; then
 fi
 
 region="$(context_value region)"
+runtime="$(context_value runtime)"
+runtime="${runtime:-emr_ec2}"
 cluster_id="$(context_value cluster_id)"
 step_id="$(context_value step_id)"
+serverless_application_id="$(context_value serverless_application_id)"
+virtual_cluster_id="$(context_value virtual_cluster_id)"
+job_run_id="$(context_value job_run_id)"
 input_path="$(context_value input_path)"
 output_path="$(context_value output_path)"
 job_uri="$(context_value job_uri)"
@@ -78,7 +83,17 @@ remove_s3_prefix() {
   aws s3 rm "$uri" --recursive --region "$region" || true
 }
 
-if [[ "${CANCEL_STEP:-true}" == "true" && -n "$cluster_id" && -n "$step_id" && -n "$region" ]] && command -v aws >/dev/null 2>&1; then
+if [[ "${CANCEL_STEP:-true}" == "true" && "$runtime" == "emr_serverless" && -n "$serverless_application_id" && -n "$job_run_id" && -n "$region" ]] && command -v aws >/dev/null 2>&1; then
+  aws emr-serverless cancel-job-run \
+    --application-id "$serverless_application_id" \
+    --job-run-id "$job_run_id" \
+    --region "$region" >/dev/null 2>&1 || true
+elif [[ "${CANCEL_STEP:-true}" == "true" && "$runtime" == "emr_eks" && -n "$virtual_cluster_id" && -n "$job_run_id" && -n "$region" ]] && command -v aws >/dev/null 2>&1; then
+  aws emr-containers cancel-job-run \
+    --virtual-cluster-id "$virtual_cluster_id" \
+    --id "$job_run_id" \
+    --region "$region" >/dev/null 2>&1 || true
+elif [[ "${CANCEL_STEP:-true}" == "true" && -n "$cluster_id" && -n "$step_id" && -n "$region" ]] && command -v aws >/dev/null 2>&1; then
   aws emr cancel-steps \
     --cluster-id "$cluster_id" \
     --step-ids "$step_id" \
@@ -91,6 +106,7 @@ remove_s3_object "$job_uri"
 
 if [[ "$context_scenario" =~ ^[A-Za-z0-9_-]+$ ]]; then
   rm -rf "$repo_root/sample-data/generated/$context_scenario"
+  rm -rf "$repo_root/sample-data/generated/$runtime/$context_scenario"
 fi
 
 if [[ "${CLEAN_CONTEXT:-false}" == "true" ]]; then

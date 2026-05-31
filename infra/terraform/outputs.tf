@@ -50,6 +50,54 @@ output "emr_ec2_instance_profile_arn" {
   value = aws_iam_instance_profile.emr_ec2.arn
 }
 
+output "emr_serverless_application_id" {
+  value = aws_emrserverless_application.demo.id
+}
+
+output "emr_serverless_job_role_arn" {
+  value = aws_iam_role.emr_serverless_job.arn
+}
+
+output "emr_serverless_log_group" {
+  value = aws_cloudwatch_log_group.emr_serverless.name
+}
+
+output "emr_serverless_log_uri" {
+  value = "s3://${aws_s3_bucket.logs.bucket}/emr-serverless/"
+}
+
+output "emr_eks_virtual_cluster_id" {
+  value = try(aws_emrcontainers_virtual_cluster.demo[0].id, "")
+}
+
+output "emr_eks_cluster_name" {
+  value = var.emr_eks_cluster_name
+}
+
+output "emr_eks_namespace" {
+  value = var.emr_eks_namespace
+}
+
+output "emr_eks_job_role_arn" {
+  value = var.emr_eks_job_role_arn
+}
+
+output "emr_eks_release_label" {
+  value = var.emr_eks_release_label
+}
+
+output "emr_eks_log_group" {
+  value = aws_cloudwatch_log_group.emr_eks.name
+}
+
+output "emr_eks_log_uri" {
+  value = "s3://${aws_s3_bucket.logs.bucket}/emr-eks/"
+}
+
+output "emr_eks_bad_image_uri" {
+  value = var.emr_eks_bad_image_uri
+}
+
 output "budget_setup_note" {
   value = local.budget_setup_note
 }

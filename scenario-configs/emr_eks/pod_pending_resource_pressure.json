@@ -1,0 +1,19 @@
+{
+  "scenario": "pod_pending_resource_pressure",
+  "runtime": "emr_eks",
+  "slice": 31,
+  "job": "spark-jobs/happy_path/job.py",
+  "expected_findings": "expected-findings/pod_pending_resource_pressure.json",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "EKS_POD_PENDING",
+  "log_backends": [
+    "kubernetes",
+    "cloudwatch",
+    "s3"
+  ],
+  "safety": [
+    "requests intentionally oversized demo executor resources",
+    "does not change node groups or autoscaling policy",
+    "job-start timeout bounds how long pods remain pending"
+  ]
+}

@@ -19,6 +19,7 @@ Optional env vars
   SKIP_SCENARIO_RUN   Set to 1 to skip scripts/run_scenario.sh
   CONTEXT_FILE         Context file path for fresh scenario submission
   RUN_ID               Run identifier for fresh scenario submission
+  RUNTIME              emr_ec2, emr_serverless, or emr_eks for fresh scenario submission
   CLUSTER_ID          Override cluster_id read from context file
   AWS_REGION          Override region read from context file
   LOG_WAIT_TIMEOUT    Max seconds to wait for EMR logs in S3
@@ -240,6 +241,84 @@ def wait_for_step(
     )
 
 
+def wait_for_serverless_job(
+    application_id: str,
+    job_run_id: str,
+    region: str,
+    timeout: int = 600,
+    poll_interval: int = 15,
+) -> str:
+    """Poll EMR Serverless get-job-run until a terminal state."""
+    terminal = {"SUCCESS", "FAILED", "CANCELLED"}
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            state = subprocess.check_output(
+                [
+                    "aws", "emr-serverless", "get-job-run",
+                    "--application-id", application_id,
+                    "--job-run-id", job_run_id,
+                    "--region", region,
+                    "--query", "jobRun.state",
+                    "--output", "text",
+                ],
+                stderr=subprocess.DEVNULL,
+                text=True,
+            ).strip()
+        except subprocess.CalledProcessError:
+            state = ""
+        if state in terminal:
+            return state
+        remaining = max(0, int(deadline - time.monotonic()))
+        print(
+            f"  Serverless job {job_run_id}: {state or '(unknown)'}. "
+            f"Waiting… ({remaining}s remaining)"
+        )
+        time.sleep(poll_interval)
+    raise TimeoutError(
+        f"Serverless job {job_run_id} did not reach terminal state within {timeout}s"
+    )
+
+
+def wait_for_eks_job(
+    virtual_cluster_id: str,
+    job_run_id: str,
+    region: str,
+    timeout: int = 600,
+    poll_interval: int = 15,
+) -> str:
+    """Poll EMR Containers describe-job-run until a terminal state."""
+    terminal = {"COMPLETED", "FAILED", "CANCELLED"}
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            state = subprocess.check_output(
+                [
+                    "aws", "emr-containers", "describe-job-run",
+                    "--virtual-cluster-id", virtual_cluster_id,
+                    "--id", job_run_id,
+                    "--region", region,
+                    "--query", "jobRun.state",
+                    "--output", "text",
+                ],
+                stderr=subprocess.DEVNULL,
+                text=True,
+            ).strip()
+        except subprocess.CalledProcessError:
+            state = ""
+        if state in terminal:
+            return state
+        remaining = max(0, int(deadline - time.monotonic()))
+        print(
+            f"  EMR on EKS job {job_run_id}: {state or '(unknown)'}. "
+            f"Waiting… ({remaining}s remaining)"
+        )
+        time.sleep(poll_interval)
+    raise TimeoutError(
+        f"EMR on EKS job {job_run_id} did not reach terminal state within {timeout}s"
+    )
+
+
 def normalize_s3_uri(uri: str) -> str:
     """Normalize Hadoop S3 schemes to an aws-cli-compatible s3:// URI."""
     for legacy in ("s3n://", "s3a://"):
@@ -301,6 +380,9 @@ def wait_for_emr_s3_logs(
     Cluster deploy mode is especially laggy because the Python exception is
     usually in YARN container stdout/stderr rather than the step wrapper logs.
     """
+    if context.get("runtime", "emr_ec2") != "emr_ec2":
+        return context
+
     if expected_outcome == "running":
         return context
 
@@ -363,6 +445,77 @@ def build_mcp_request(
     RunningJobDiagnosticSignals; scenario-specific fields like root_cause_hint
     and log_signal are dropped.
     """
+    runtime = context.get("runtime", "emr_ec2")
+
+    if runtime in {"emr_serverless", "serverless"}:
+        target = dict(context.get("target") or {})
+        serverless_application_id = (
+            target.get("serverless_application_id")
+            or context.get("serverless_application_id")
+        )
+        job_run_id = target.get("job_run_id") or context.get("job_run_id")
+        attempt = target.get("attempt", context.get("attempt"))
+        req = {
+            "account_id": account_id,
+            "region": context.get("region", ""),
+            "runtime": "emr_serverless",
+            "target": {
+                "serverless_application_id": serverless_application_id,
+                "job_run_id": job_run_id,
+            },
+            "job_state": context.get("job_state", "unknown"),
+        }
+        if attempt not in (None, ""):
+            req["target"]["attempt"] = int(attempt)
+
+        time_window = context.get("time_window")
+        if time_window and isinstance(time_window, dict):
+            req["time_window"] = time_window
+
+        raw_signals = context.get("diagnostic_signals")
+        if raw_signals and isinstance(raw_signals, dict):
+            filtered = {k: v for k, v in raw_signals.items() if k in _RUNNING_SIGNAL_FIELDS}
+            if filtered:
+                req["diagnostic_signals"] = filtered
+
+        return req
+
+    if runtime in {"emr_eks", "eks"}:
+        target = dict(context.get("target") or {})
+        virtual_cluster_id = (
+            target.get("virtual_cluster_id")
+            or context.get("virtual_cluster_id")
+        )
+        job_run_id = target.get("job_run_id") or context.get("job_run_id")
+        eks_cluster_name = target.get("eks_cluster_name") or context.get("eks_cluster_name")
+        namespace = target.get("namespace") or context.get("namespace")
+        req = {
+            "account_id": account_id,
+            "region": context.get("region", ""),
+            "runtime": "emr_eks",
+            "target": {
+                "virtual_cluster_id": virtual_cluster_id,
+                "job_run_id": job_run_id,
+            },
+            "job_state": context.get("job_state", "unknown"),
+        }
+        if eks_cluster_name:
+            req["target"]["eks_cluster_name"] = eks_cluster_name
+        if namespace:
+            req["target"]["namespace"] = namespace
+
+        time_window = context.get("time_window")
+        if time_window and isinstance(time_window, dict):
+            req["time_window"] = time_window
+
+        raw_signals = context.get("diagnostic_signals")
+        if raw_signals and isinstance(raw_signals, dict):
+            filtered = {k: v for k, v in raw_signals.items() if k in _RUNNING_SIGNAL_FIELDS}
+            if filtered:
+                req["diagnostic_signals"] = filtered
+
+        return req
+
     req: dict[str, Any] = {
         "account_id": account_id,
         "region": context.get("region", ""),
@@ -438,9 +591,20 @@ def main(argv: list[str] | None = None) -> int:
         context = load_json(context_file)
 
     scenario: str = args.scenario or context.get("scenario", "happy_path")
+    runtime: str = context.get("runtime", "emr_ec2")
     print(f"Scenario  : {scenario}")
-    print(f"Cluster   : {context.get('cluster_id', '(none)')}")
-    print(f"Step      : {context.get('step_id', '(none)')}")
+    print(f"Runtime   : {runtime}")
+    if runtime == "emr_serverless":
+        print(f"App       : {context.get('serverless_application_id', '(none)')}")
+        print(f"Job run   : {context.get('job_run_id', '(none)')}")
+    elif runtime == "emr_eks":
+        print(f"Virtual cluster: {context.get('virtual_cluster_id', '(none)')}")
+        print(f"Job run        : {context.get('job_run_id', '(none)')}")
+        print(f"EKS cluster    : {context.get('eks_cluster_name', '(none)')}")
+        print(f"Namespace      : {context.get('namespace', '(none)')}")
+    else:
+        print(f"Cluster   : {context.get('cluster_id', '(none)')}")
+        print(f"Step      : {context.get('step_id', '(none)')}")
 
     # ------------------------------------------------------------------
     # Step 3: Load expected findings
@@ -461,10 +625,56 @@ def main(argv: list[str] | None = None) -> int:
     # ------------------------------------------------------------------
     cluster_id = context.get("cluster_id", "")
     step_id = context.get("step_id", "")
+    serverless_application_id = context.get("serverless_application_id", "")
+    job_run_id = context.get("job_run_id", "")
+    virtual_cluster_id = context.get("virtual_cluster_id", "")
     region = context.get("region", "")
 
     if (
         expected_outcome != "running"
+        and runtime == "emr_serverless"
+        and serverless_application_id
+        and job_run_id
+        and region
+        and not args.skip_run
+    ):
+        print(f"Waiting for Serverless job run {job_run_id} to complete…")
+        try:
+            final_state = wait_for_serverless_job(
+                serverless_application_id,
+                job_run_id,
+                region,
+                timeout=args.wait_timeout,
+                poll_interval=args.poll_interval,
+            )
+            print(f"  Serverless job state: {final_state}")
+            context = export_context(repo_root, context_file, exported_file)
+        except (TimeoutError, RuntimeError) as exc:
+            print(f"  Warning: {exc}. Proceeding with current context.")
+    elif (
+        expected_outcome != "running"
+        and runtime == "emr_eks"
+        and virtual_cluster_id
+        and job_run_id
+        and region
+        and not args.skip_run
+    ):
+        print(f"Waiting for EMR on EKS job run {job_run_id} to complete…")
+        try:
+            final_state = wait_for_eks_job(
+                virtual_cluster_id,
+                job_run_id,
+                region,
+                timeout=args.wait_timeout,
+                poll_interval=args.poll_interval,
+            )
+            print(f"  EMR on EKS job state: {final_state}")
+            context = export_context(repo_root, context_file, exported_file)
+        except (TimeoutError, RuntimeError) as exc:
+            print(f"  Warning: {exc}. Proceeding with current context.")
+    elif (
+        expected_outcome != "running"
+        and runtime == "emr_ec2"
         and cluster_id
         and step_id
         and region
@@ -484,7 +694,7 @@ def main(argv: list[str] | None = None) -> int:
         except (TimeoutError, RuntimeError) as exc:
             print(f"  Warning: {exc}. Proceeding with current context.")
 
-    if expected_outcome != "running" and not args.no_log_wait:
+    if expected_outcome != "running" and not args.no_log_wait and runtime == "emr_ec2":
         print("Waiting for EMR logs in S3…")
         context = wait_for_emr_s3_logs(
             repo_root=repo_root,
@@ -495,6 +705,10 @@ def main(argv: list[str] | None = None) -> int:
             timeout=args.log_wait_timeout,
             poll_interval=args.log_poll_interval,
         )
+    elif expected_outcome != "running" and not args.no_log_wait and runtime == "emr_serverless":
+        print("Skipping EC2 step-log wait for EMR Serverless runtime.")
+    elif expected_outcome != "running" and not args.no_log_wait and runtime == "emr_eks":
+        print("Skipping EC2 step-log wait for EMR on EKS runtime.")
 
     # ------------------------------------------------------------------
     # Step 5: Call Harrier MCP
@@ -514,7 +728,12 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     mcp_args = build_mcp_request(context, account_id)
-    print(f"  Starting investigation (cluster={mcp_args.get('cluster_id')})…")
+    if mcp_args.get("runtime") == "emr_serverless":
+        print(f"  Starting investigation (job_run={mcp_args['target'].get('job_run_id')})…")
+    elif mcp_args.get("runtime") == "emr_eks":
+        print(f"  Starting investigation (job_run={mcp_args['target'].get('job_run_id')})…")
+    else:
+        print(f"  Starting investigation (cluster={mcp_args.get('cluster_id')})…")
     try:
         actual = client.call_tool("harrier_start_emr_investigation", mcp_args)
     except HarrierClientError as exc:

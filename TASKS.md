@@ -170,11 +170,63 @@ Done when:
 - [ ] ECS service reaches steady state with `mwaa_desired_count=1`.
 - [ ] Airflow UI is reachable.
 - [ ] `harrier_demo_run_scenario` can submit `happy_path`.
+
+## Slice 30: Demo Lab Serverless Scenarios
+
+Status: Implemented, pending live AWS validation
+
+Goal: live validation for the simpler new runtime.
+
+Tasks:
+
+- [x] Add Terraform for EMR Serverless app.
+- [x] Add Spark job submission script.
+- [x] Add scenarios:
+  - [x] happy path
+  - [x] executor OOM
+  - [x] missing dependency
+  - [x] S3 path missing
+  - [x] bad input data
+- [x] Add expected finding links/configs for Serverless scenarios.
+- [x] Extend validation harness with `runtime=emr_serverless`.
+
+Done when:
+
+- [ ] One live Serverless failure validates through Harrier.
 - [x] Each scenario creates expected logs.
 - [x] Batch 1 includes at least one client-mode and one cluster-mode log layout.
 - [x] Each scenario has expected finding JSON.
 - [x] Cleanup restores demo state.
 - [x] Harrier can detect each scenario through normal investigation context.
+
+## Slice 31: Demo Lab EKS Scenarios
+
+Status: Implemented, pending live AWS validation
+
+Goal: live validation for EMR on EKS.
+
+Tasks:
+
+- [x] Add or document EKS prerequisite.
+- [x] Add EMR virtual cluster setup.
+- [x] Add job submission script.
+- [x] Add scenarios:
+  - [x] happy path
+  - [x] executor OOM
+  - [x] image/dependency failure
+  - [x] pod pending/resource pressure
+  - [x] S3 access denied
+- [x] Add expected finding links/configs for EKS scenarios.
+- [x] Extend validation harness with `runtime=emr_eks`.
+
+Done when:
+
+- [ ] One live EKS failure validates through Harrier.
+- [x] EKS prerequisites are documented.
+- [x] Virtual cluster registration is defined for an existing EKS namespace.
+- [x] Each scenario writes runtime-aware investigation context.
+- [x] Cleanup cancels active EMR on EKS job runs and removes demo S3 artifacts.
+- [x] Harrier can be called with the EMR on EKS typed target.
 
 ## Slice 14: Demo Scenarios Batch 2
 

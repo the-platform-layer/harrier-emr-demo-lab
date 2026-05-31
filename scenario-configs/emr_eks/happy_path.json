@@ -1,0 +1,19 @@
+{
+  "scenario": "happy_path",
+  "runtime": "emr_eks",
+  "slice": 31,
+  "job": "spark-jobs/happy_path/job.py",
+  "expected_findings": "expected-findings/happy_path.json",
+  "expected_outcome": "success",
+  "expected_root_cause_category": "UNKNOWN",
+  "log_backends": [
+    "s3",
+    "cloudwatch",
+    "kubernetes"
+  ],
+  "safety": [
+    "uses a preconfigured demo EKS namespace",
+    "writes input and output under demo S3 prefixes",
+    "does not create or mutate production Kubernetes resources"
+  ]
+}

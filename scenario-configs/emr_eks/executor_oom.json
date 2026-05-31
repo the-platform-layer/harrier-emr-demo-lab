@@ -1,0 +1,19 @@
+{
+  "scenario": "executor_oom",
+  "runtime": "emr_eks",
+  "slice": 31,
+  "job": "spark-jobs/executor_oom/job.py",
+  "expected_findings": "expected-findings/executor_oom.json",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "EXECUTOR_OOM",
+  "log_backends": [
+    "s3",
+    "cloudwatch",
+    "kubernetes"
+  ],
+  "safety": [
+    "uses a preconfigured demo EKS namespace",
+    "uses bounded executor memory pressure defaults",
+    "does not change EKS node groups or cluster autoscaling"
+  ]
+}

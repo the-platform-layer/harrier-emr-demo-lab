@@ -63,6 +63,77 @@ variable "emr_release_label" {
   default     = "emr-6.15.0"
 }
 
+variable "emr_serverless_release_label" {
+  description = "EMR release label for the demo EMR Serverless Spark application."
+  type        = string
+  default     = "emr-7.2.0"
+}
+
+variable "emr_serverless_idle_timeout_minutes" {
+  description = "Idle auto-stop timeout for the demo EMR Serverless application."
+  type        = number
+  default     = 15
+
+  validation {
+    condition     = var.emr_serverless_idle_timeout_minutes >= 1 && var.emr_serverless_idle_timeout_minutes <= 60
+    error_message = "emr_serverless_idle_timeout_minutes must be between 1 and 60 for the disposable demo lab."
+  }
+}
+
+variable "emr_serverless_max_cpu" {
+  description = "Maximum CPU capacity for the demo EMR Serverless application."
+  type        = string
+  default     = "4 vCPU"
+}
+
+variable "emr_serverless_max_memory" {
+  description = "Maximum memory capacity for the demo EMR Serverless application."
+  type        = string
+  default     = "16 GB"
+}
+
+variable "emr_serverless_max_disk" {
+  description = "Maximum disk capacity for the demo EMR Serverless application."
+  type        = string
+  default     = "100 GB"
+}
+
+variable "enable_emr_eks" {
+  description = "Register an existing EKS namespace as an EMR on EKS virtual cluster for Slice 31."
+  type        = bool
+  default     = false
+}
+
+variable "emr_eks_cluster_name" {
+  description = "Existing EKS cluster name to register with EMR on EKS when enable_emr_eks is true."
+  type        = string
+  default     = ""
+}
+
+variable "emr_eks_namespace" {
+  description = "Kubernetes namespace used for EMR on EKS demo job runs."
+  type        = string
+  default     = "harrier-emr-jobs"
+}
+
+variable "emr_eks_release_label" {
+  description = "EMR release label for demo EMR on EKS job runs."
+  type        = string
+  default     = "emr-7.2.0-latest"
+}
+
+variable "emr_eks_job_role_arn" {
+  description = "IAM role ARN onboarded for EMR on EKS job execution."
+  type        = string
+  default     = ""
+}
+
+variable "emr_eks_bad_image_uri" {
+  description = "Deliberately invalid Spark image URI used by the image_pull_failure scenario."
+  type        = string
+  default     = "public.ecr.aws/docker/library/busybox:not-a-real-harrier-demo-tag"
+}
+
 variable "master_instance_type" {
   description = "Instance type for the EMR primary node."
   type        = string

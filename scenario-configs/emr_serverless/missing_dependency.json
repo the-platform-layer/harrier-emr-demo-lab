@@ -1,0 +1,18 @@
+{
+  "scenario": "missing_dependency",
+  "runtime": "emr_serverless",
+  "slice": 30,
+  "job": "spark-jobs/missing_dependency/job.py",
+  "expected_findings": "expected-findings/missing_dependency.json",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "DEPENDENCY_MISSING",
+  "log_backends": [
+    "s3",
+    "cloudwatch"
+  ],
+  "safety": [
+    "uses demo EMR Serverless application only",
+    "fails on a deliberately absent Python module",
+    "does not install or remove dependencies"
+  ]
+}

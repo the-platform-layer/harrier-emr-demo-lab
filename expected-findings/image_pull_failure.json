@@ -1,0 +1,17 @@
+{
+  "scenario": "image_pull_failure",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "EKS_IMAGE_PULL_FAILURE",
+  "recommendation_type": "KUBERNETES",
+  "pr_ready": true,
+  "expected_evidence": [
+    "Kubernetes pod status includes ImagePullBackOff or ErrImagePull",
+    "The failing image URI is recorded in the scenario diagnostic signal",
+    "Harrier can classify the failure even when Spark driver logs never start"
+  ],
+  "expected_recommendations": [
+    "Fix the EMR on EKS image reference or publish a valid immutable image",
+    "Validate the image in a non-production namespace before replacing the job configuration",
+    "Roll back to the previous working image tag or digest if the replacement fails"
+  ]
+}

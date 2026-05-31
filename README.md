@@ -13,6 +13,8 @@ Track slice implementation tasks in [TASKS.md](TASKS.md).
 ## Drop 1 Demo Scope
 
 - Amazon EMR on EC2
+- Amazon EMR Serverless Spark application for the Slice 30 demo scenarios
+- EMR on EKS virtual cluster registration for Slice 31 scenarios
 - S3 archived EMR logs
 - CloudWatch metrics and alarms
 - Controlled Spark failure scenarios
@@ -55,6 +57,76 @@ Key outputs:
 - `processed_bucket`
 - `region`
 - `max_runtime_hours`
+- `emr_serverless_application_id`
+- `emr_serverless_job_role_arn`
+- `emr_serverless_log_uri`
+- `emr_eks_virtual_cluster_id`
+- `emr_eks_job_role_arn`
+- `emr_eks_log_uri`
+
+## Run EMR Serverless Scenarios
+
+Slice 30 adds a parallel Serverless runtime for the simpler Spark scenarios:
+
+```bash
+RUNTIME=emr_serverless ./scripts/run_scenario.sh happy_path
+RUNTIME=emr_serverless ./scripts/run_scenario.sh executor_oom
+RUNTIME=emr_serverless ./scripts/run_scenario.sh missing_dependency
+RUNTIME=emr_serverless ./scripts/run_scenario.sh s3_path_missing
+RUNTIME=emr_serverless ./scripts/run_scenario.sh bad_input_data
+```
+
+The Serverless submitter uploads the PySpark entry point, starts an EMR Serverless job run, enables S3 and CloudWatch log publication, and writes `.harrier-demo/last-context.json` with `runtime=emr_serverless`, `target.serverless_application_id`, and `target.job_run_id`.
+
+Validate through Harrier with the same harness:
+
+```bash
+AWS_ACCOUNT_ID=123456789012 \
+RUNTIME=emr_serverless \
+./scripts/validate_scenario.sh executor_oom
+```
+
+## Run EMR On EKS Scenarios
+
+Slice 31 targets an existing EKS cluster. Prepare the namespace and EMR job role trust first:
+
+```bash
+EMR_EKS_CLUSTER_NAME=analytics-dev \
+EMR_EKS_JOB_ROLE_ARN=arn:aws:iam::123456789012:role/harrier-demo-emr-eks-job \
+./scripts/setup_eks_virtual_cluster.sh
+```
+
+Then enable virtual-cluster registration in Terraform:
+
+```bash
+terraform -chdir=infra/terraform apply \
+  -var enable_emr_eks=true \
+  -var emr_eks_cluster_name=analytics-dev \
+  -var emr_eks_namespace=harrier-emr-jobs \
+  -var emr_eks_job_role_arn=arn:aws:iam::123456789012:role/harrier-demo-emr-eks-job
+```
+
+Run the EKS scenarios:
+
+```bash
+RUNTIME=emr_eks ./scripts/run_scenario.sh happy_path
+RUNTIME=emr_eks ./scripts/run_scenario.sh executor_oom
+RUNTIME=emr_eks ./scripts/run_scenario.sh image_pull_failure
+RUNTIME=emr_eks ./scripts/run_scenario.sh pod_pending_resource_pressure
+RUNTIME=emr_eks ./scripts/run_scenario.sh s3_access_denied
+```
+
+The EKS submitter uploads the PySpark entry point, starts an EMR Containers job run, enables S3 and CloudWatch log publication, and writes `.harrier-demo/last-context.json` with `runtime=emr_eks`, `target.virtual_cluster_id`, `target.job_run_id`, `target.eks_cluster_name`, and `target.namespace`.
+
+Validate through Harrier:
+
+```bash
+AWS_ACCOUNT_ID=123456789012 \
+RUNTIME=emr_eks \
+./scripts/validate_scenario.sh image_pull_failure
+```
+
+Prerequisites are documented in [docs/emr-on-eks-prerequisites.md](docs/emr-on-eks-prerequisites.md).
 
 ## Run Happy Path
 

@@ -1,0 +1,18 @@
+{
+  "scenario": "bad_input_data",
+  "runtime": "emr_serverless",
+  "slice": 30,
+  "job": "spark-jobs/bad_input_data/job.py",
+  "expected_findings": "expected-findings/bad_input_data.json",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "BAD_INPUT_DATA",
+  "log_backends": [
+    "s3",
+    "cloudwatch"
+  ],
+  "safety": [
+    "uses demo EMR Serverless application only",
+    "writes malformed input only under demo raw S3 prefixes",
+    "does not mutate upstream data"
+  ]
+}

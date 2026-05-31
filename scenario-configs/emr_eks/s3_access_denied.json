@@ -1,0 +1,19 @@
+{
+  "scenario": "s3_access_denied",
+  "runtime": "emr_eks",
+  "slice": 31,
+  "job": "spark-jobs/s3_access_denied/job.py",
+  "expected_findings": "expected-findings/s3_access_denied.json",
+  "expected_outcome": "failed",
+  "expected_root_cause_category": "S3_ACCESS_DENIED",
+  "log_backends": [
+    "s3",
+    "cloudwatch",
+    "kubernetes"
+  ],
+  "safety": [
+    "uses a demo-only denied S3 URI signal",
+    "does not change bucket policy or IAM permissions",
+    "does not read protected production data"
+  ]
+}

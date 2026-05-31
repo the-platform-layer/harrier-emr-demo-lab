@@ -13,6 +13,7 @@
 #   SKIP_SCENARIO_RUN  Set to 1 to skip job submission and use existing context
 #   CONTEXT_FILE        Context file path for fresh scenario submission
 #   RUN_ID              Run identifier for fresh scenario submission
+#   RUNTIME             emr_ec2, emr_serverless, or emr_eks for fresh scenario submission
 #   CLUSTER_ID         Override cluster_id from context
 #   AWS_REGION         Override region from context
 #   LOG_WAIT_TIMEOUT   Max seconds to wait for EMR logs in S3 (default: 420)
@@ -25,6 +26,16 @@
 #   AWS_ACCOUNT_ID=123456789012 \
 #   HARRIER_MCP_URL=http://localhost:8000/mcp \
 #   scripts/validate_scenario.sh executor_oom
+#
+#   # Run the Serverless executor_oom scenario end-to-end:
+#   AWS_ACCOUNT_ID=123456789012 \
+#   RUNTIME=emr_serverless \
+#   scripts/validate_scenario.sh executor_oom
+#
+#   # Run the EMR on EKS image-pull scenario end-to-end:
+#   AWS_ACCOUNT_ID=123456789012 \
+#   RUNTIME=emr_eks \
+#   scripts/validate_scenario.sh image_pull_failure
 #
 #   # Validate against an existing context file (no AWS step submission):
 #   SKIP_SCENARIO_RUN=1 \

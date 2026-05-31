@@ -23,6 +23,70 @@ Initial scenario set:
 - `s3_access_denied`
 - `bad_input_data`
 
+## EMR Serverless Scenario Set
+
+Slice 30 supports a focused Serverless pass for the scenarios that do not require EC2-specific cluster or YARN behavior:
+
+```bash
+RUNTIME=emr_serverless ./scripts/run_scenario.sh happy_path
+RUNTIME=emr_serverless ./scripts/run_scenario.sh executor_oom
+RUNTIME=emr_serverless ./scripts/run_scenario.sh missing_dependency
+RUNTIME=emr_serverless ./scripts/run_scenario.sh s3_path_missing
+RUNTIME=emr_serverless ./scripts/run_scenario.sh bad_input_data
+```
+
+The exported context uses the runtime-aware MCP contract:
+
+```json
+{
+  "runtime": "emr_serverless",
+  "target": {
+    "serverless_application_id": "00f1abcd2efg3hij",
+    "job_run_id": "00f1abcd2efg3hij-000001"
+  }
+}
+```
+
+Serverless logs are published to both S3 and CloudWatch:
+
+- S3: `s3://<logs-bucket>/emr-serverless/applications/<application-id>/jobs/<job-run-id>/...`
+- CloudWatch Logs: `/harrier-demo/emr-serverless`, with stream prefix `harrier-demo/<scenario>/<run-id>`
+
+Expected findings are reused from the matching EC2 scenario files because the Spark failure signatures are intentionally the same. The difference is the runtime target and log layout, not the root-cause category.
+
+## EMR On EKS Scenario Set
+
+Slice 31 supports EMR on EKS against an existing EKS cluster and namespace:
+
+```bash
+RUNTIME=emr_eks ./scripts/run_scenario.sh happy_path
+RUNTIME=emr_eks ./scripts/run_scenario.sh executor_oom
+RUNTIME=emr_eks ./scripts/run_scenario.sh image_pull_failure
+RUNTIME=emr_eks ./scripts/run_scenario.sh pod_pending_resource_pressure
+RUNTIME=emr_eks ./scripts/run_scenario.sh s3_access_denied
+```
+
+The exported context uses the runtime-aware MCP contract:
+
+```json
+{
+  "runtime": "emr_eks",
+  "target": {
+    "virtual_cluster_id": "vc-1234567890abcdef0",
+    "job_run_id": "job-run-123",
+    "eks_cluster_name": "analytics-dev",
+    "namespace": "harrier-emr-jobs"
+  }
+}
+```
+
+EKS logs are published to both S3 and CloudWatch:
+
+- S3: `s3://<logs-bucket>/emr-eks/<virtual-cluster-id>/jobs/<job-run-id>/containers/...`
+- CloudWatch Logs: `/harrier-demo/emr-eks`, with stream prefix `harrier-demo/<scenario>/<run-id>`
+
+`happy_path`, `executor_oom`, and `s3_access_denied` reuse the matching Spark scenario expected findings. `image_pull_failure` and `pod_pending_resource_pressure` add EKS-specific expected findings because they are diagnosed primarily from Kubernetes pod status rather than Spark stack traces.
+
 ## `happy_path`
 
 Proves the baseline EMR on EC2 environment works before any failure scenario is introduced.

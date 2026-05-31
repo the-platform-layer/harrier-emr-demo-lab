@@ -32,6 +32,8 @@ from validation.validate import (
     parse_args,
     run_scenario,
     wait_for_emr_s3_logs,
+    wait_for_eks_job,
+    wait_for_serverless_job,
 )
 
 
@@ -718,6 +720,76 @@ class TestLogWaitHelpers(unittest.TestCase):
         mock_check_output.assert_not_called()
         mock_export_context.assert_not_called()
 
+    @patch("validation.validate.export_context")
+    @patch("validation.validate.subprocess.check_output")
+    def test_wait_for_serverless_context_skips_ec2_s3_checks(
+        self,
+        mock_check_output: MagicMock,
+        mock_export_context: MagicMock,
+    ) -> None:
+        ctx = {
+            "runtime": "emr_serverless",
+            "region": "ap-southeast-2",
+            "serverless_application_id": "00f1app",
+            "job_run_id": "00f1app-000001",
+            "log_uri": "s3://demo-logs/emr-serverless/",
+        }
+
+        result = wait_for_emr_s3_logs(
+            repo_root=ROOT,
+            context_file=ROOT / ".harrier-demo" / "last-context.json",
+            exported_file=ROOT / ".harrier-demo" / "last-context-exported.json",
+            context=ctx,
+            expected_outcome="failed",
+            timeout=1,
+            poll_interval=1,
+        )
+
+        self.assertIs(result, ctx)
+        mock_check_output.assert_not_called()
+        mock_export_context.assert_not_called()
+
+
+class TestServerlessWaitHelper(unittest.TestCase):
+    @patch("validation.validate.subprocess.check_output")
+    def test_wait_for_serverless_job_returns_terminal_state(self, mock_check_output: MagicMock) -> None:
+        mock_check_output.side_effect = ["RUNNING", "SUCCESS"]
+
+        result = wait_for_serverless_job(
+            "00f1app",
+            "00f1app-000001",
+            "ap-southeast-2",
+            timeout=2,
+            poll_interval=0,
+        )
+
+        self.assertEqual(result, "SUCCESS")
+        command = mock_check_output.call_args_list[-1].args[0]
+        self.assertIn("emr-serverless", command)
+        self.assertIn("get-job-run", command)
+        self.assertIn("00f1app-000001", command)
+
+
+class TestEksWaitHelper(unittest.TestCase):
+    @patch("validation.validate.subprocess.check_output")
+    def test_wait_for_eks_job_returns_terminal_state(self, mock_check_output: MagicMock) -> None:
+        mock_check_output.side_effect = ["RUNNING", "FAILED"]
+
+        result = wait_for_eks_job(
+            "vc-1234567890abcdef0",
+            "job-run-123",
+            "ap-southeast-2",
+            timeout=2,
+            poll_interval=0,
+        )
+
+        self.assertEqual(result, "FAILED")
+        command = mock_check_output.call_args_list[-1].args[0]
+        self.assertIn("emr-containers", command)
+        self.assertIn("describe-job-run", command)
+        self.assertIn("vc-1234567890abcdef0", command)
+        self.assertIn("job-run-123", command)
+
 
 class TestBuildMcpRequest(unittest.TestCase):
     def _context(self) -> dict:
@@ -795,6 +867,62 @@ class TestBuildMcpRequest(unittest.TestCase):
         ctx["application_id"] = None
         req = build_mcp_request(ctx, "123456789012")
         self.assertNotIn("application_id", req)
+
+    def test_serverless_runtime_uses_typed_target(self) -> None:
+        ctx = {
+            "runtime": "emr_serverless",
+            "region": "ap-southeast-2",
+            "serverless_application_id": "00f1abcd2efg3hij",
+            "job_run_id": "00f1abcd2efg3hij-000001",
+            "attempt": 1,
+            "job_state": "failed",
+            "time_window": {"start": "2026-01-01T00:00:00Z", "end": "2026-01-01T01:00:00Z"},
+            "diagnostic_signals": {
+                "active_stage_count": 1,
+                "root_cause_hint": "EXECUTOR_OOM",
+            },
+        }
+
+        req = build_mcp_request(ctx, "123456789012")
+
+        self.assertEqual(req["account_id"], "123456789012")
+        self.assertEqual(req["runtime"], "emr_serverless")
+        self.assertEqual(req["target"]["serverless_application_id"], "00f1abcd2efg3hij")
+        self.assertEqual(req["target"]["job_run_id"], "00f1abcd2efg3hij-000001")
+        self.assertEqual(req["target"]["attempt"], 1)
+        self.assertEqual(req["job_state"], "failed")
+        self.assertNotIn("cluster_id", req)
+        self.assertNotIn("step_id", req)
+        self.assertEqual(req["diagnostic_signals"], {"active_stage_count": 1})
+
+    def test_eks_runtime_uses_typed_target(self) -> None:
+        ctx = {
+            "runtime": "emr_eks",
+            "region": "ap-southeast-2",
+            "virtual_cluster_id": "vc-1234567890abcdef0",
+            "job_run_id": "job-run-123",
+            "eks_cluster_name": "analytics-dev",
+            "namespace": "harrier-emr-jobs",
+            "job_state": "failed",
+            "time_window": {"start": "2026-01-01T00:00:00Z", "end": "2026-01-01T01:00:00Z"},
+            "diagnostic_signals": {
+                "active_stage_count": 1,
+                "root_cause_hint": "EKS_POD_PENDING",
+            },
+        }
+
+        req = build_mcp_request(ctx, "123456789012")
+
+        self.assertEqual(req["account_id"], "123456789012")
+        self.assertEqual(req["runtime"], "emr_eks")
+        self.assertEqual(req["target"]["virtual_cluster_id"], "vc-1234567890abcdef0")
+        self.assertEqual(req["target"]["job_run_id"], "job-run-123")
+        self.assertEqual(req["target"]["eks_cluster_name"], "analytics-dev")
+        self.assertEqual(req["target"]["namespace"], "harrier-emr-jobs")
+        self.assertEqual(req["job_state"], "failed")
+        self.assertNotIn("cluster_id", req)
+        self.assertNotIn("step_id", req)
+        self.assertEqual(req["diagnostic_signals"], {"active_stage_count": 1})
 
 
 class TestRunningSignalFields(unittest.TestCase):

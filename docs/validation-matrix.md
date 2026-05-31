@@ -34,4 +34,30 @@ This matrix tracks the currently stable demo scenarios that have been validated 
 
 - Use `scripts/validate_demo_suite.sh` to rerun the stable suite. Set `VALIDATE_PARALLEL=1` to validate the suite concurrently.
 - The validator waits for EMR S3 log archival before calling Harrier. This is important for cluster-mode jobs because the actionable Python exception usually lands in YARN container logs after the EMR step is already terminal.
+- For `runtime=emr_serverless`, the validator waits on `aws emr-serverless get-job-run` and sends the runtime-aware typed target to Harrier. EC2 step-log polling is skipped because Serverless log discovery happens inside the MCP runtime provider.
+- For `runtime=emr_eks`, the validator waits on `aws emr-containers describe-job-run` and sends the runtime-aware typed target to Harrier. EC2 step-log polling is skipped because EKS S3, CloudWatch, and optional Kubernetes pod discovery happen inside the MCP runtime provider.
 - Set `NO_LOG_WAIT=1` only when intentionally testing partial-log behavior.
+
+## EMR Serverless Slice 30
+
+These scenarios are implemented and ready for live validation:
+
+| Scenario | Expected Category | Runtime | Status | Notes |
+| --- | --- | --- | --- | --- |
+| `happy_path` | `UNKNOWN` | `emr_serverless` | Pending live AWS validation | Proves Serverless app, S3 input/output, and runtime target export. |
+| `executor_oom` | `EXECUTOR_OOM` | `emr_serverless` | Pending live AWS validation | Uses bounded executor allocation and Serverless driver/executor logs. |
+| `missing_dependency` | `DEPENDENCY_MISSING` | `emr_serverless` | Pending live AWS validation | Driver logs contain the absent module signal. |
+| `s3_path_missing` | `S3_PATH_MISSING` | `emr_serverless` | Pending live AWS validation | Reads a deliberately missing demo S3 prefix. |
+| `bad_input_data` | `BAD_INPUT_DATA` | `emr_serverless` | Pending live AWS validation | Uploads malformed demo CSV under the raw bucket. |
+
+## EMR On EKS Slice 31
+
+These scenarios are implemented and ready for live validation against an existing EKS cluster:
+
+| Scenario | Expected Category | Runtime | Status | Notes |
+| --- | --- | --- | --- | --- |
+| `happy_path` | `UNKNOWN` | `emr_eks` | Pending live AWS validation | Proves virtual cluster, S3 input/output, and runtime target export. |
+| `executor_oom` | `EXECUTOR_OOM` | `emr_eks` | Pending live AWS validation | Uses bounded executor allocation and EKS driver/executor logs. |
+| `image_pull_failure` | `EKS_IMAGE_PULL_FAILURE` | `emr_eks` | Pending live AWS validation | Uses an intentionally invalid demo image tag and Kubernetes pod status. |
+| `pod_pending_resource_pressure` | `EKS_POD_PENDING` | `emr_eks` | Pending live AWS validation | Requests oversized executor resources to produce Pending or Unschedulable pod evidence. |
+| `s3_access_denied` | `S3_ACCESS_DENIED` | `emr_eks` | Pending live AWS validation | Emits an S3 access denied signal from Spark logs without mutating IAM. |
