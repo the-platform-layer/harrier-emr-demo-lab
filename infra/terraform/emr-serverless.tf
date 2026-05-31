@@ -33,10 +33,17 @@ data "aws_iam_policy_document" "emr_serverless_job" {
   ]
 
   statement {
-    sid = "WriteCloudWatchLogs"
+    sid = "DescribeCloudWatchLogGroups"
+    actions = [
+      "logs:DescribeLogGroups",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    sid = "WriteCloudWatchLogStreams"
     actions = [
       "logs:CreateLogStream",
-      "logs:DescribeLogGroups",
       "logs:DescribeLogStreams",
       "logs:PutLogEvents",
     ]

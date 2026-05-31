@@ -364,6 +364,51 @@ def _has_application_logs(log_uri: str, cluster_id: str, application_id: str, re
     return _listing_has_log_file(listing, ("stderr", "stdout", "syslog"))
 
 
+def _has_serverless_s3_logs(
+    log_uri: str,
+    application_id: str,
+    job_run_id: str,
+    region: str,
+) -> bool:
+    job_uri = (
+        f"{normalize_s3_uri(log_uri).rstrip('/')}/"
+        f"applications/{application_id}/jobs/{job_run_id}/"
+    )
+    try:
+        listing = _s3_ls(job_uri, region, recursive=True)
+    except subprocess.CalledProcessError:
+        return False
+    return _listing_has_log_file(listing, ("stderr", "stdout", "job-metadata"))
+
+
+def _has_cloudwatch_log_streams(
+    log_group: str,
+    log_stream_prefix: str,
+    region: str,
+) -> bool:
+    if not (log_group and log_stream_prefix and region):
+        return False
+    try:
+        output = subprocess.check_output(
+            [
+                "aws", "logs", "describe-log-streams",
+                "--log-group-name", log_group,
+                "--log-stream-name-prefix", log_stream_prefix,
+                "--region", region,
+                "--query", "length(logStreams)",
+                "--output", "text",
+            ],
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+    except subprocess.CalledProcessError:
+        return False
+    try:
+        return int(output) > 0
+    except ValueError:
+        return False
+
+
 def wait_for_emr_s3_logs(
     *,
     repo_root: Path,
@@ -432,6 +477,71 @@ def wait_for_emr_s3_logs(
         time.sleep(poll_interval)
 
     print("  Warning: EMR S3 logs were not fully available before timeout.")
+    return latest_context
+
+
+def wait_for_serverless_logs(
+    *,
+    repo_root: Path,
+    context_file: Path,
+    exported_file: Path,
+    context: dict[str, Any],
+    expected_outcome: str,
+    timeout: int = 420,
+    poll_interval: int = 30,
+) -> dict[str, Any]:
+    """Wait for EMR Serverless S3 or CloudWatch logs to be discoverable."""
+    if context.get("runtime") != "emr_serverless":
+        return context
+
+    if expected_outcome == "running":
+        return context
+
+    application_id = context.get("serverless_application_id", "")
+    job_run_id = context.get("job_run_id", "")
+    region = context.get("region", "")
+    log_uri = context.get("log_uri", "")
+    log_group = context.get("cloudwatch_log_group", "")
+    log_stream_prefix = context.get("cloudwatch_log_stream_prefix", "")
+
+    if not (application_id and job_run_id and region):
+        return context
+
+    expected_stream_prefix = (
+        f"{log_stream_prefix.strip('/')}/applications/{application_id}/jobs/{job_run_id}"
+        if log_stream_prefix
+        else ""
+    )
+    deadline = time.monotonic() + timeout
+    latest_context = context
+    while time.monotonic() < deadline:
+        s3_ready = bool(log_uri) and _has_serverless_s3_logs(
+            log_uri,
+            application_id,
+            job_run_id,
+            region,
+        )
+        cloudwatch_ready = bool(log_group and expected_stream_prefix) and _has_cloudwatch_log_streams(
+            log_group,
+            expected_stream_prefix,
+            region,
+        )
+
+        if cloudwatch_ready or s3_ready:
+            try:
+                return export_context(repo_root, context_file, exported_file)
+            except (FileNotFoundError, RuntimeError):
+                return latest_context
+
+        remaining = max(0, int(deadline - time.monotonic()))
+        print(
+            "  Waiting for EMR Serverless logs "
+            f"(s3_logs={s3_ready}, cloudwatch_logs={cloudwatch_ready}; "
+            f"{remaining}s remaining)"
+        )
+        time.sleep(poll_interval)
+
+    print("  Warning: EMR Serverless logs were not available before timeout.")
     return latest_context
 
 
@@ -706,7 +816,16 @@ def main(argv: list[str] | None = None) -> int:
             poll_interval=args.log_poll_interval,
         )
     elif expected_outcome != "running" and not args.no_log_wait and runtime == "emr_serverless":
-        print("Skipping EC2 step-log wait for EMR Serverless runtime.")
+        print("Waiting for EMR Serverless logs…")
+        context = wait_for_serverless_logs(
+            repo_root=repo_root,
+            context_file=context_file,
+            exported_file=exported_file,
+            context=context,
+            expected_outcome=expected_outcome,
+            timeout=args.log_wait_timeout,
+            poll_interval=args.log_poll_interval,
+        )
     elif expected_outcome != "running" and not args.no_log_wait and runtime == "emr_eks":
         print("Skipping EC2 step-log wait for EMR on EKS runtime.")
 
