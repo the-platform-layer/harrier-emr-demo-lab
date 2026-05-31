@@ -29,6 +29,7 @@ class Slice31EksTests(unittest.TestCase):
         self.assertIn("aws_cloudwatch_log_group\" \"emr_eks", eks_tf)
         self.assertIn('resource "aws_eks_cluster" "demo"', cluster_tf)
         self.assertIn('resource "aws_eks_node_group" "demo"', cluster_tf)
+        self.assertIn('resource "aws_iam_openid_connect_provider" "eks"', cluster_tf)
         self.assertIn('resource "aws_iam_role" "emr_eks_job"', cluster_tf)
         self.assertIn("enable_emr_eks", variables_tf)
         self.assertIn("enable_demo_eks_cluster", variables_tf)

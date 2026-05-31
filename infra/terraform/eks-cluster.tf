@@ -117,6 +117,24 @@ resource "aws_eks_cluster" "demo" {
   depends_on = [aws_iam_role_policy_attachment.eks_cluster]
 }
 
+data "tls_certificate" "eks_oidc" {
+  count = var.enable_demo_eks_cluster ? 1 : 0
+
+  url = aws_eks_cluster.demo[0].identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "eks" {
+  count = var.enable_demo_eks_cluster ? 1 : 0
+
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks_oidc[0].certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.demo[0].identity[0].oidc[0].issuer
+
+  tags = {
+    Name = "${local.name_prefix}-eks-oidc"
+  }
+}
+
 resource "aws_eks_node_group" "demo" {
   count = var.enable_demo_eks_cluster ? 1 : 0
 
