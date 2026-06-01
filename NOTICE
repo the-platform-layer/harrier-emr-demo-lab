@@ -1,0 +1,9 @@
+Harrier EMR Demo Lab
+Copyright 2026 Harrier contributors
+
+This repository contains disposable AWS demo infrastructure, Spark jobs,
+validation harnesses, and scenario assets for Harrier EMR MCP.
+
+AWS service names may be trademarks of Amazon Web Services, Inc. or its
+affiliates. Other names may be trademarks of their respective owners.
+

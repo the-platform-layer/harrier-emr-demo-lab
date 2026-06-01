@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" role="img" aria-labelledby="title desc">
+  <title id="title">Harrier EMR Demo Lab social preview</title>
+  <desc id="desc">Open-source demo lab preview for controlled EMR failure scenarios.</desc>
+  <rect width="1280" height="640" fill="#0b1220"/>
+  <rect x="72" y="72" width="1136" height="496" rx="32" fill="#111827" stroke="#334155" stroke-width="2"/>
+  <text x="120" y="180" fill="#f8fafc" font-family="Inter, Arial, sans-serif" font-size="72" font-weight="800">Harrier EMR Demo Lab</text>
+  <text x="124" y="245" fill="#a7f3d0" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="600">Controlled failures for EC2, Serverless, and EKS validation</text>
+  <g font-family="Inter, Arial, sans-serif" font-size="28" font-weight="700">
+    <rect x="126" y="336" width="220" height="72" rx="14" fill="#064e3b"/>
+    <text x="154" y="382" fill="#dcfce7">Deploy</text>
+    <rect x="390" y="336" width="220" height="72" rx="14" fill="#0f766e"/>
+    <text x="418" y="382" fill="#ccfbf1">Trigger</text>
+    <rect x="654" y="336" width="220" height="72" rx="14" fill="#1e3a8a"/>
+    <text x="682" y="382" fill="#dbeafe">Validate</text>
+    <rect x="918" y="336" width="220" height="72" rx="14" fill="#7f1d1d"/>
+    <text x="946" y="382" fill="#fee2e2">Destroy</text>
+  </g>
+  <text x="126" y="488" fill="#cbd5e1" font-family="Inter, Arial, sans-serif" font-size="28">A sandbox-first lab for proving Harrier diagnosis quality against real AWS evidence.</text>
+</svg>
+

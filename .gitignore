@@ -11,17 +11,16 @@ __pycache__/
 terraform.tfvars
 .env
 
-# Local LLM/session planning state
+# Local session planning state
 PROGRESS.md
 TASKS.md
 STATUS.md
 BUILD-STATE.md
 CODEX_TASKS.md
-CLAUDE.md
-AGENTS.md
 .claude/
 .codex/
 .harrier-demo/
+.harrier-local/
 sample-data/generated/*
 sample-data/large/*
 !sample-data/generated/.gitkeep

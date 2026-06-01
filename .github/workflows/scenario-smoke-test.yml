@@ -2,11 +2,39 @@ name: scenario-smoke-test
 
 on:
   workflow_dispatch:
+    inputs:
+      scenario:
+        description: Scenario name to validate when AWS credentials are configured.
+        required: false
+        default: s3_access_denied
+        type: string
+      runtime:
+        description: Runtime to use for the scenario.
+        required: false
+        default: emr_ec2
+        type: choice
+        options:
+          - emr_ec2
+          - emr_serverless
+          - emr_eks
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: echo "Scenario smoke tests require a configured demo AWS account."
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Static harness tests
+        run: python -m pytest -q
+
+      - name: Live scenario note
+        run: |
+          echo "Requested scenario: ${{ inputs.scenario }}"
+          echo "Requested runtime: ${{ inputs.runtime }}"
+          echo "Live scenario execution requires configured AWS credentials, demo infrastructure, and HARRIER_MCP_URL."
+          echo "Run locally or extend this workflow with environment-protected AWS credentials."
 

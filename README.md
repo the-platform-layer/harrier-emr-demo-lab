@@ -1,90 +1,125 @@
-# Harrier EMR Demo Lab
+<h1 align="center">
+  <br>
+  <img src="docs/assets/harrier-demo-lab.svg" alt="Harrier EMR Demo Lab" width="620">
+  <br>
+</h1>
 
-This repository contains the disposable demo environment for Harrier EMR MCP.
+<p align="center">
+  <strong>Disposable AWS scenarios for validating Harrier EMR MCP against real EMR failures.</strong>
+</p>
 
-It owns demo infrastructure, Spark jobs, sample data, scenario runners, expected findings, validation scripts, alarms, cleanup, and cost controls.
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
+  <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/ci-github%20actions-2563eb.svg" alt="CI"></a>
+  <a href="docs/cost-and-retention.md"><img src="https://img.shields.io/badge/AWS-cost%20warning-b91c1c.svg" alt="AWS cost warning"></a>
+  <a href="docs/scenarios.md"><img src="https://img.shields.io/badge/scenarios-EC2%20%7C%20Serverless%20%7C%20EKS-0f766e.svg" alt="Scenarios"></a>
+</p>
 
-The production MCP server and AWS DevOps Agent registration assets live in `harrier-emr-mcp`.
+<p align="center">
+  <a href="#safety-first">Safety First</a> |
+  <a href="#quick-start">Quick Start</a> |
+  <a href="#scenario-catalog">Scenarios</a> |
+  <a href="#validation-flow">Validation</a> |
+  <a href="#documentation">Docs</a>
+</p>
 
-## Drop 1 Demo Scope
+---
 
-- Amazon EMR on EC2
-- Amazon EMR Serverless Spark application for the Slice 30 demo scenarios
-- EMR on EKS virtual cluster registration for Slice 31 scenarios
-- S3 archived EMR logs
-- CloudWatch metrics and alarms
-- Controlled Spark failure scenarios
-- Scenario validation against an already-running Harrier MCP endpoint
-- Optional AWS MWAA-compatible local runner on ECS Fargate for scenario orchestration
+Harrier EMR Demo Lab creates controlled Amazon EMR incidents and validates that Harrier EMR MCP can diagnose them. It owns the disposable AWS infrastructure, Spark jobs, sample data, scenario runners, expected findings, validation harness, alarms, cleanup, and cost-control docs.
 
-## Safety
+The production MCP server lives in [`harrier-emr-mcp`](../harrier-emr-mcp).
 
-Demo resources are disposable. Use a demo AWS account when possible.
+## Safety First
 
-Defaults to implement in Terraform:
+This repository can create real AWS resources and real AWS cost. Use a sandbox account.
 
-- `Project=harrier-demo` and `Environment=demo` tags
-- EMR auto-termination
-- S3 lifecycle rules
-- CloudWatch log retention
-- Optional cost alarm or AWS Budget setup
-- Cleanup scripts per scenario
+- Review [docs/cost-and-retention.md](docs/cost-and-retention.md) before deploying.
+- Review [docs/cleanup.md](docs/cleanup.md) before running long scenario batches.
+- Keep `.harrier-demo/`, Terraform state, generated data, and credentials out of git.
+- Destroy resources when validation is complete.
 
-## Deploy Baseline Infrastructure
+## Quick Start
+
+Deploy baseline infrastructure:
 
 ```bash
-cd infra/terraform
-terraform init
-terraform plan
-terraform apply
+make deploy
 ```
 
-Or use the helper:
+Run a single EMR on EC2 scenario:
 
 ```bash
-./scripts/deploy.sh
+SCENARIO=s3_access_denied RUNTIME=emr_ec2 make run-scenario
 ```
 
-Key outputs:
-
-- `cluster_id`
-- `log_uri`
-- `raw_bucket`
-- `processed_bucket`
-- `region`
-- `max_runtime_hours`
-- `emr_serverless_application_id`
-- `emr_serverless_job_role_arn`
-- `emr_serverless_log_uri`
-- `emr_eks_virtual_cluster_id`
-- `emr_eks_job_role_arn`
-- `emr_eks_log_uri`
-
-## Run EMR Serverless Scenarios
-
-Slice 30 adds a parallel Serverless runtime for the simpler Spark scenarios:
+Validate the scenario through a running Harrier MCP endpoint:
 
 ```bash
-RUNTIME=emr_serverless ./scripts/run_scenario.sh happy_path
+AWS_ACCOUNT_ID=123456789012 \
+HARRIER_MCP_URL=https://example.execute-api.region.amazonaws.com/mcp \
+SCENARIO=s3_access_denied RUNTIME=emr_ec2 make validate
+```
+
+Destroy the lab:
+
+```bash
+make destroy
+```
+
+## Runtime Support
+
+| Runtime | Supported Scenarios | Notes |
+| --- | ---:| --- |
+| EMR on EC2 | broad coverage | Spark step failures, YARN/container logs, CloudWatch metrics |
+| EMR Serverless | focused coverage | Spark job-run failures with S3 and CloudWatch logs |
+| EMR on EKS | focused coverage | EMR Containers job runs with optional Kubernetes pod diagnostics |
+| MWAA local runner | orchestration demo | Runs scenario DAGs on ECS Fargate |
+
+## Scenario Catalog
+
+| Scenario | Runtime Coverage | Expected Finding |
+| --- | --- | --- |
+| `happy_path` | EC2, Serverless, EKS | success |
+| `s3_access_denied` | EC2, EKS | `S3_ACCESS_DENIED` |
+| `bad_input_data` | EC2, Serverless | `BAD_INPUT_DATA` |
+| `executor_oom` | EC2, Serverless, EKS | `EXECUTOR_OOM` |
+| `driver_oom` | EC2 | `DRIVER_OOM` |
+| `missing_dependency` | EC2, Serverless | `DEPENDENCY_MISSING` |
+| `s3_path_missing` | EC2, Serverless | `S3_PATH_MISSING` |
+| `shuffle_spill` | EC2 | `SHUFFLE_SPILL` |
+| `data_skew` | EC2 | `DATA_SKEW` |
+| `kms_access_denied` | EC2 | `KMS_ACCESS_DENIED` |
+| `hdfs_full` | EC2 | `HDFS_FULL` |
+| `db_connection_failure` | EC2 | `DB_CONNECTION_FAILURE` |
+| `db_lock_timeout` | EC2 | `DB_LOCK_TIMEOUT` |
+| `db_partition_hotspot` | EC2 | `DB_PARTITION_HOTSPOT` |
+| `db_large_join_spill` | EC2 | `DB_LARGE_JOIN_SPILL` |
+| `db_bad_sql_plan` | EC2 | `DB_BAD_SQL_PLAN` |
+| `livy_session_failure` | EC2 | `LIVY_SESSION_FAILURE` |
+| `image_pull_failure` | EKS | `EKS_IMAGE_PULL_FAILURE` |
+| `pod_pending_resource_pressure` | EKS | `EKS_POD_PENDING` |
+
+Full details are in [docs/scenarios.md](docs/scenarios.md) and [docs/validation-matrix.md](docs/validation-matrix.md).
+
+## Run Serverless Scenarios
+
+```bash
 RUNTIME=emr_serverless ./scripts/run_scenario.sh executor_oom
-RUNTIME=emr_serverless ./scripts/run_scenario.sh missing_dependency
-RUNTIME=emr_serverless ./scripts/run_scenario.sh s3_path_missing
 RUNTIME=emr_serverless ./scripts/run_scenario.sh bad_input_data
 ```
 
-The Serverless submitter uploads the PySpark entry point, starts an EMR Serverless job run, enables S3 and CloudWatch log publication, and writes `.harrier-demo/last-context.json` with `runtime=emr_serverless`, `target.serverless_application_id`, and `target.job_run_id`.
-
-Validate through Harrier with the same harness:
+Validate through Harrier:
 
 ```bash
 AWS_ACCOUNT_ID=123456789012 \
 RUNTIME=emr_serverless \
+HARRIER_MCP_URL=https://example.execute-api.region.amazonaws.com/mcp \
 ./scripts/validate_scenario.sh executor_oom
 ```
 
 ## Run EMR On EKS Scenarios
 
-Slice 31 targets an existing EKS cluster. Prepare the namespace and EMR job role trust first:
+Prepare the EKS virtual cluster:
 
 ```bash
 EMR_EKS_CLUSTER_NAME=analytics-dev \
@@ -92,126 +127,67 @@ EMR_EKS_JOB_ROLE_ARN=arn:aws:iam::123456789012:role/harrier-demo-emr-eks-job \
 ./scripts/setup_eks_virtual_cluster.sh
 ```
 
-Then enable virtual-cluster registration in Terraform:
+Run and validate:
 
 ```bash
-terraform -chdir=infra/terraform apply \
-  -var enable_emr_eks=true \
-  -var emr_eks_cluster_name=analytics-dev \
-  -var emr_eks_namespace=harrier-emr-jobs \
-  -var emr_eks_job_role_arn=arn:aws:iam::123456789012:role/harrier-demo-emr-eks-job
-```
-
-Run the EKS scenarios:
-
-```bash
-RUNTIME=emr_eks ./scripts/run_scenario.sh happy_path
-RUNTIME=emr_eks ./scripts/run_scenario.sh executor_oom
 RUNTIME=emr_eks ./scripts/run_scenario.sh image_pull_failure
-RUNTIME=emr_eks ./scripts/run_scenario.sh pod_pending_resource_pressure
-RUNTIME=emr_eks ./scripts/run_scenario.sh s3_access_denied
-```
 
-The EKS submitter uploads the PySpark entry point, starts an EMR Containers job run, enables S3 and CloudWatch log publication, and writes `.harrier-demo/last-context.json` with `runtime=emr_eks`, `target.virtual_cluster_id`, `target.job_run_id`, `target.eks_cluster_name`, and `target.namespace`.
-
-Validate through Harrier:
-
-```bash
 AWS_ACCOUNT_ID=123456789012 \
 RUNTIME=emr_eks \
+HARRIER_MCP_URL=https://example.execute-api.region.amazonaws.com/mcp \
 ./scripts/validate_scenario.sh image_pull_failure
 ```
 
-Prerequisites are documented in [docs/emr-on-eks-prerequisites.md](docs/emr-on-eks-prerequisites.md).
+See [docs/emr-on-eks-prerequisites.md](docs/emr-on-eks-prerequisites.md).
 
-## Run Happy Path
+## Validation Flow
 
-After the baseline cluster exists, submit the known-good Spark job:
-
-```bash
-./scripts/run_scenario.sh happy_path
+```mermaid
+flowchart LR
+  Deploy["Deploy demo infra"] --> Scenario["Run scenario"]
+  Scenario --> Context["Export investigation context"]
+  Context --> Harrier["Call Harrier MCP"]
+  Harrier --> Compare["Compare expected finding"]
+  Compare --> Report["Write validation report"]
+  Report --> Cleanup["Cleanup or destroy"]
 ```
 
-The script generates deterministic CSV input, uploads it to the raw S3 bucket, uploads the PySpark job, submits an EMR step, and writes the latest context to `.harrier-demo/last-context.json`.
+Validation reports are written under `.harrier-demo/validation/` and should not be committed.
 
-Use `DEPLOY_MODE=client` or `DEPLOY_MODE=cluster` to choose the Spark driver log layout for a run. Cluster mode is the default.
+## MWAA Local Runner
 
-Export the Harrier investigation context:
-
-```bash
-./scripts/export_investigation_context.sh
-```
-
-The exporter preserves cluster ID, step ID, deploy mode, job state, region, S3 paths, and time window. When EMR step logs are available in S3, it also tries to extract the YARN application ID.
-
-Long-running delay demos can be submitted the same way:
-
-```bash
-./scripts/run_scenario.sh long_running_data_delay
-./scripts/run_scenario.sh long_running_resource_delay
-DB_SECRET_ID=<secret-id> ./scripts/run_scenario.sh long_running_db_delay
-```
-
-These runs keep the EMR step in a running window so Harrier can investigate delay before failure.
-
-Slice 10 controlled failure demos:
-
-```bash
-./scripts/run_scenario.sh executor_oom
-./scripts/run_scenario.sh driver_oom
-./scripts/run_scenario.sh missing_dependency
-./scripts/run_scenario.sh s3_access_denied
-./scripts/run_scenario.sh bad_input_data
-```
-
-The runner writes context to `.harrier-demo/last-context.json` for each run. Use `./scripts/cleanup_scenario.sh <scenario>` to remove demo S3 artifacts and cancel an active step when possible.
-
-Slice 14 advanced demos:
-
-```bash
-./scripts/run_scenario.sh data_skew
-./scripts/run_scenario.sh shuffle_spill
-./scripts/run_scenario.sh kms_access_denied
-./scripts/run_scenario.sh hdfs_full
-./scripts/run_scenario.sh db_connection_failure
-./scripts/run_scenario.sh db_lock_timeout
-./scripts/run_scenario.sh db_partition_hotspot
-./scripts/run_scenario.sh db_large_join_spill
-./scripts/run_scenario.sh db_bad_sql_plan
-./scripts/run_scenario.sh livy_session_failure
-```
-
-The DB and Livy failure scenarios are safe simulations by default. They emit diagnostic evidence without mutating a database, KMS policy, IAM policy, Livy server, HDFS, or local disks.
-
-## Run Scenarios From MWAA Local Runner On ECS
-
-The demo lab includes an AWS MWAA-compatible local runner container deployment for ECS Fargate. It uses AWS's `aws/aws-mwaa-local-runner` image source and layers in the Harrier DAGs and scenario scripts.
+The demo lab can package the scenario runner into an AWS MWAA-compatible local runner on ECS Fargate.
 
 ```bash
 ./scripts/deploy_mwaa_local_runner.sh
 ```
 
-After deploy:
+See [docs/mwaa-local-runner.md](docs/mwaa-local-runner.md).
 
-```bash
-terraform -chdir=infra/terraform output mwaa_airflow_url
-terraform -chdir=infra/terraform output mwaa_admin_password_secret_arn
-```
+## Documentation
 
-Open the Airflow UI, log in as `admin`, and trigger `harrier_demo_run_scenario` or `harrier_demo_smoke_suite`.
+- [Demo overview](docs/demo-overview.md)
+- [Scenario catalog](docs/scenarios.md)
+- [Expected findings](docs/expected-findings.md)
+- [Validation matrix](docs/validation-matrix.md)
+- [Cost and retention](docs/cost-and-retention.md)
+- [Cleanup](docs/cleanup.md)
+- [DevOps Agent demo flow](docs/devops-agent-demo-flow.md)
+- [EMR on EKS prerequisites](docs/emr-on-eks-prerequisites.md)
+- [Local developer experience](docs/local-developer-experience.md)
+- [CI and release](docs/ci-and-release.md)
+- [Roadmap](ROADMAP.md)
+- [Support](SUPPORT.md)
+- [Maintainers](MAINTAINERS.md)
+- [Architecture decisions](docs/adr/README.md)
+- [GitHub labels](docs/labels.md)
+- [Examples](examples/README.md)
+- [DevOps Agent prompts](examples/devops-agent-prompts.md)
 
-Details are in [docs/mwaa-local-runner.md](docs/mwaa-local-runner.md).
+## Contributing
 
-## Destroy
+Contributions should improve safety, repeatability, clarity, or coverage. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-```bash
-./scripts/destroy.sh
-```
+## License
 
-The destroy helper prints Terraform-managed resources and requires an explicit confirmation phrase.
-
-## Cost Warning
-
-The default cluster uses one primary node and one core node. EMR auto-termination is enabled after the configured idle period, but this is not a hard wall-clock cap if jobs keep the cluster busy.
-
-Set up an AWS Budget or billing alarm for the demo account before long-running scenario work.
+Apache-2.0. See [LICENSE](LICENSE).
