@@ -40,15 +40,15 @@ This matrix tracks the currently stable demo scenarios that have been validated 
 
 ## EMR Serverless Slice 30
 
-These scenarios are implemented. The Slice 30 acceptance gate, one live Serverless failure through Harrier, passed with `executor_oom`. The remaining Serverless rows are optional parity validation.
+All Slice 30 scenarios passed live validation against the EMR Serverless application `00g63elinhft1g29`.
 
 | Scenario | Last Run Time (UTC) | Expected Category | Actual Category | Result | Report Path | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| `happy_path` | - | `UNKNOWN` | - | Optional parity not run | - | Proves Serverless app, S3 input/output, and runtime target export. |
+| `happy_path` | 2026-06-01T00:05:37Z | `UNKNOWN` | `UNKNOWN` | Pass | `.harrier-demo/validation/happy_path-20260601T000537Z.json` | Live EMR Serverless job run `00g642d6r2tpn82b`; verifies no false positive on a successful Spark job. |
 | `executor_oom` | 2026-05-31T05:59:29Z | `EXECUTOR_OOM` | `EXECUTOR_OOM` | Pass | `.harrier-demo/validation/executor_oom-20260531T055929Z.json` | Live EMR Serverless validation on application `00g63elinhft1g29`, job run `00g63esr1juado2b`. |
-| `missing_dependency` | - | `DEPENDENCY_MISSING` | - | Optional parity not run | - | Driver logs should contain the absent module signal. |
-| `s3_path_missing` | - | `S3_PATH_MISSING` | - | Optional parity not run | - | Reads a deliberately missing demo S3 prefix. |
-| `bad_input_data` | - | `BAD_INPUT_DATA` | - | Optional parity not run | - | Uploads malformed demo CSV under the raw bucket. |
+| `missing_dependency` | 2026-06-01T00:08:41Z | `DEPENDENCY_MISSING` | `DEPENDENCY_MISSING` | Pass | `.harrier-demo/validation/missing_dependency-20260601T000841Z.json` | Live EMR Serverless job run `00g642g68ooqh82b`; driver logs contain the absent module signal. |
+| `s3_path_missing` | 2026-06-01T00:11:42Z | `S3_PATH_MISSING` | `S3_PATH_MISSING` | Pass | `.harrier-demo/validation/s3_path_missing-20260601T001142Z.json` | Live EMR Serverless job run `00g642htecp2io2b`; reads a deliberately missing demo S3 prefix. |
+| `bad_input_data` | 2026-06-01T00:15:15Z | `BAD_INPUT_DATA` | `BAD_INPUT_DATA` | Pass | `.harrier-demo/validation/bad_input_data-20260601T001515Z.json` | Live EMR Serverless job run `00g642jktui1402b`; uploads malformed demo CSV under the raw bucket. |
 
 ## EMR On EKS Slice 31
 
