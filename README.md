@@ -180,6 +180,7 @@ See [docs/mwaa-local-runner.md](docs/mwaa-local-runner.md).
 - [Support](SUPPORT.md)
 - [Maintainers](MAINTAINERS.md)
 - [Architecture decisions](docs/adr/README.md)
+- [Social preview assets](docs/social-assets.md)
 - [GitHub labels](docs/labels.md)
 - [Examples](examples/README.md)
 - [DevOps Agent prompts](examples/devops-agent-prompts.md)
