@@ -33,3 +33,17 @@ whether the expected finding matched the actual finding, and explain any mismatc
 without dumping raw JSON.
 ```
 
+## Native Vs Harrier OOM Comparison
+
+Generate fresh native-baseline and Harrier MCP prompts for the EC2, Serverless,
+and EKS executor OOM comparison:
+
+```bash
+AWS_ACCOUNT_ID=123456789012 \
+./scripts/run_devops_agent_oom_comparison.sh
+```
+
+Use the generated `prompts.md` in two separate read-only Agent Spaces:
+
+- native baseline: Harrier MCP disabled
+- Harrier lane: Harrier MCP read-only tools allowlisted

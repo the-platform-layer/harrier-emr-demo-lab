@@ -140,6 +140,19 @@ HARRIER_MCP_URL=https://example.execute-api.region.amazonaws.com/mcp \
 
 See [docs/emr-on-eks-prerequisites.md](docs/emr-on-eks-prerequisites.md).
 
+## Compare Native DevOps Agent Vs Harrier
+
+Generate a side-by-side OOM comparison across EC2, Serverless, and EKS:
+
+```bash
+AWS_ACCOUNT_ID=123456789012 \
+./scripts/run_devops_agent_oom_comparison.sh
+```
+
+The comparison writes native and Harrier prompt sets plus a scorecard under
+`.harrier-demo/comparisons/`. See
+[docs/devops-agent-oom-comparison.md](docs/devops-agent-oom-comparison.md).
+
 ## Validation Flow
 
 ```mermaid
@@ -173,6 +186,7 @@ See [docs/mwaa-local-runner.md](docs/mwaa-local-runner.md).
 - [Cost and retention](docs/cost-and-retention.md)
 - [Cleanup](docs/cleanup.md)
 - [DevOps Agent demo flow](docs/devops-agent-demo-flow.md)
+- [DevOps Agent OOM comparison](docs/devops-agent-oom-comparison.md)
 - [EMR on EKS prerequisites](docs/emr-on-eks-prerequisites.md)
 - [Local developer experience](docs/local-developer-experience.md)
 - [CI and release](docs/ci-and-release.md)
