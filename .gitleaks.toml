@@ -1,0 +1,10 @@
+[extend]
+useDefault = true
+
+[allowlist]
+paths = [
+  '''\.harrier-demo/''',
+  '''comparison-output/''',
+  '''infra/terraform/\.terraform/''',
+  '''infra/terraform/terraform\.tfstate(\.backup)?$''',
+]

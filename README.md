@@ -27,7 +27,8 @@
 
 Harrier EMR Demo Lab creates controlled Amazon EMR incidents and validates that Harrier EMR MCP can diagnose them. It owns the disposable AWS infrastructure, Spark jobs, sample data, scenario runners, expected findings, validation harness, alarms, cleanup, and cost-control docs.
 
-The production MCP server lives in [`harrier-emr-mcp`](../harrier-emr-mcp).
+The production MCP server is documented at
+[docs.harrier.theplatformlayer.com](https://docs.harrier.theplatformlayer.com).
 
 ## Safety First
 

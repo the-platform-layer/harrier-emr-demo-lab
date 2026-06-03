@@ -373,7 +373,7 @@ Simulates a Spark/JDBC job that is still running because database-side work is s
 Run:
 
 ```bash
-DB_SECRET_ID=<secret-id> DB_SLEEP_SECONDS=900 ./scripts/run_scenario.sh long_running_db_delay
+DB_SECRET_ID=demo/database/secret-id DB_SLEEP_SECONDS=900 ./scripts/run_scenario.sh long_running_db_delay
 ```
 
 The secret should contain `jdbc_url`, `username`, and `password`. The job uses Secrets Manager so the demo does not put the database password in the EMR step arguments.
