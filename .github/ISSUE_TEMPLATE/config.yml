@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security or credential exposure
+    url: https://github.com/the-platform-layer/harrier-emr-demo-lab/security/policy
+    about: Report credentials, account exposure, or unsafe Terraform privately.
+  - name: Demo lab documentation
+    url: https://docs.harrier.theplatformlayer.com/demo-lab/
+    about: Read scenario, cleanup, cost, and validation guidance first.
+  - name: Harrier MCP documentation
+    url: https://docs.harrier.theplatformlayer.com/
+    about: Use this for the production MCP server and DevOps Agent integration.

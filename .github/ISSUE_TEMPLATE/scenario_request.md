@@ -1,7 +1,9 @@
 ---
 name: Scenario request
 about: Request a new controlled EMR failure scenario
-labels: scenario
+title: "[Scenario]: "
+labels: scenario, needs-triage
+assignees: ""
 ---
 
 ## Failure To Demonstrate
@@ -22,3 +24,17 @@ Example: `S3_ACCESS_DENIED`, `BAD_INPUT_DATA`, `EXECUTOR_OOM`.
 
 How can this be triggered without mutating production-like resources?
 
+## Evidence Harrier Should Collect
+
+- [ ] EMR API metadata
+- [ ] S3 step or container logs
+- [ ] CloudWatch logs
+- [ ] CloudWatch metrics
+- [ ] Kubernetes pod diagnostics
+- [ ] Other:
+
+## Cost And Cleanup Notes
+
+- What resources are required?
+- What should cleanup delete?
+- Is a budget or runtime limit needed?

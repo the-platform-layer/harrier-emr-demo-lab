@@ -1,7 +1,9 @@
 ---
 name: Feature request
 about: Suggest a new scenario, validation flow, or demo improvement
-labels: enhancement
+title: "[Feature]: "
+labels: enhancement, needs-triage
+assignees: ""
 ---
 
 ## Problem
@@ -24,3 +26,8 @@ Describe the desired behavior.
 
 What AWS resources are involved?
 
+## Cleanup Or Validation Impact
+
+- What cleanup behavior is required?
+- What expected finding or validation output should change?
+- Can this be simulated without a live AWS mutation?
