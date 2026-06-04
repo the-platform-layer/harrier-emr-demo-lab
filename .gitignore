@@ -10,6 +10,8 @@ __pycache__/
 *.tfstate.*
 terraform.tfvars
 .env
+.env.*
+!.env.example
 
 # Local session planning state
 PROGRESS.md
