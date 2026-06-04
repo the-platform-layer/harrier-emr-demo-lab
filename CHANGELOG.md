@@ -13,3 +13,4 @@ lab releases do not publish runtime artifacts or deploy AWS resources.
 - Added label sync automation for public issue triage.
 - Added release workflow scaffolding for documented demo-lab milestones.
 - Added repository hygiene checks to block tracked local state, generated output, and caches.
+- Added a public release checklist and removed internal slice wording from scenario docs.

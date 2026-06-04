@@ -38,9 +38,10 @@ This matrix tracks the currently stable demo scenarios that have been validated 
 - For `runtime=emr_eks`, the validator waits on `aws emr-containers describe-job-run` and sends the runtime-aware typed target to Harrier. EC2 step-log polling is skipped because EKS S3, CloudWatch, and optional Kubernetes pod discovery happen inside the MCP runtime provider. For Kubernetes-first failures such as image pull and pending pods, the validator captures live pod evidence before EMR on EKS cleanup removes the pod.
 - Set `NO_LOG_WAIT=1` only when intentionally testing partial-log behavior.
 
-## EMR Serverless Slice 30
+## EMR Serverless Live Validation
 
-All Slice 30 scenarios passed live validation against the EMR Serverless application `00g63elinhft1g29`.
+All listed EMR Serverless scenarios passed live validation against the EMR
+Serverless application `00g63elinhft1g29`.
 
 | Scenario | Last Run Time (UTC) | Expected Category | Actual Category | Result | Report Path | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -50,9 +51,11 @@ All Slice 30 scenarios passed live validation against the EMR Serverless applica
 | `s3_path_missing` | 2026-06-01T00:11:42Z | `S3_PATH_MISSING` | `S3_PATH_MISSING` | Pass | `.harrier-demo/validation/s3_path_missing-20260601T001142Z.json` | Live EMR Serverless job run `00g642htecp2io2b`; reads a deliberately missing demo S3 prefix. |
 | `bad_input_data` | 2026-06-01T00:15:15Z | `BAD_INPUT_DATA` | `BAD_INPUT_DATA` | Pass | `.harrier-demo/validation/bad_input_data-20260601T001515Z.json` | Live EMR Serverless job run `00g642jktui1402b`; uploads malformed demo CSV under the raw bucket. |
 
-## EMR On EKS Slice 31
+## EMR On EKS Live Validation
 
-All Slice 31 scenarios passed live validation against the disposable EKS cluster `harrier-demo-eks`, virtual cluster `rhqipmqf1s7e37r25ftwltvt0`, and namespace `harrier-emr-jobs`.
+All listed EMR on EKS scenarios passed live validation against the disposable
+EKS cluster `harrier-demo-eks`, virtual cluster `rhqipmqf1s7e37r25ftwltvt0`,
+and namespace `harrier-emr-jobs`.
 
 | Scenario | Last Run Time (UTC) | Expected Category | Actual Category | Result | Report Path | Notes |
 | --- | --- | --- | --- | --- | --- | --- |

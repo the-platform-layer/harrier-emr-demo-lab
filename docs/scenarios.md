@@ -12,7 +12,8 @@ This matters because driver logs land in different places:
 - cluster mode: driver logs are usually YARN/container logs.
 - client mode: driver logs are usually step/controller/Livy/primary-node logs.
 
-The demo lab should include at least one client-mode and one cluster-mode run before the first public demo.
+The stable demo set includes both client-mode and cluster-mode runs so Harrier
+can validate the two common EMR log layouts.
 
 Initial scenario set:
 
@@ -25,7 +26,8 @@ Initial scenario set:
 
 ## EMR Serverless Scenario Set
 
-Slice 30 supports a focused Serverless pass for the scenarios that do not require EC2-specific cluster or YARN behavior:
+The Serverless scenario set covers Spark failures that do not require
+EC2-specific cluster or YARN behavior:
 
 ```bash
 RUNTIME=emr_serverless ./scripts/run_scenario.sh happy_path
@@ -56,7 +58,7 @@ Expected findings are reused from the matching EC2 scenario files because the Sp
 
 ## EMR On EKS Scenario Set
 
-Slice 31 supports EMR on EKS against an existing EKS cluster and namespace:
+The EMR on EKS scenario set runs against an existing EKS cluster and namespace:
 
 ```bash
 RUNTIME=emr_eks ./scripts/run_scenario.sh happy_path
@@ -110,7 +112,7 @@ Expected Harrier result:
 - No root-cause finding.
 - Evidence confirms the cluster, step, S3 paths, and logs are reachable.
 
-## Slice 10 Failure Scenarios
+## Core Failure Scenarios
 
 Run any batch 1 scenario through the same runner:
 

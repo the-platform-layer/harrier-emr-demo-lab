@@ -12,7 +12,7 @@ Scenario cleanup uses the latest context for the requested scenario:
 
 It removes the scenario output prefix, generated input object when present, uploaded job object, and locally generated sample data. It also tries to cancel the EMR step if it is still active. Set `CLEAN_CONTEXT=true` to remove the selected run context after cleanup.
 
-For Slice 2 baseline infrastructure:
+For baseline infrastructure:
 
 ```bash
 ./scripts/destroy.sh

@@ -6,7 +6,7 @@ The scenario validation harness compares Harrier's actual root cause category to
 
 The `happy_path` expected finding is intentionally empty. It is a baseline proof that Harrier can receive context, inspect reachable EMR evidence, and avoid inventing a root cause when the Spark job succeeds.
 
-Slice 10 expected findings cover:
+Core expected findings cover:
 
 - `executor_oom`
 - `driver_oom`
@@ -16,7 +16,7 @@ Slice 10 expected findings cover:
 
 Each file includes the expected outcome, primary root-cause category, evidence strings Harrier should find, and recommendation type.
 
-Slice 14 expected findings cover advanced Spark, IAM/KMS, storage, DB, and Livy scenarios:
+Advanced expected findings cover Spark, IAM/KMS, storage, DB, and Livy scenarios:
 
 - `data_skew`
 - `shuffle_spill`
@@ -38,7 +38,7 @@ DB performance scenarios should also assert `recommendation_type=DB` and `pr_rea
 
 The `db_bad_sql_plan` scenario should assert that Harrier uses SQL plan evidence, not only Spark runtime symptoms, before returning `DB_BAD_SQL_PLAN`.
 
-Slice 30 EMR Serverless expected findings reuse the same scenario files for:
+EMR Serverless expected findings reuse the same scenario files for:
 
 - `happy_path`
 - `executor_oom`
@@ -48,13 +48,13 @@ Slice 30 EMR Serverless expected findings reuse the same scenario files for:
 
 The expected root-cause categories do not change by runtime. Serverless validation should additionally prove that the request uses `runtime=emr_serverless` with `target.serverless_application_id` and `target.job_run_id`, and that Harrier reads Serverless S3 or CloudWatch logs instead of EC2 step/YARN paths.
 
-Slice 31 EMR on EKS expected findings reuse existing scenario files for:
+EMR on EKS expected findings reuse existing scenario files for:
 
 - `happy_path`
 - `executor_oom`
 - `s3_access_denied`
 
-Slice 31 adds EKS-specific expected finding files for:
+The EKS scenario set adds EKS-specific expected finding files for:
 
 - `image_pull_failure`
 - `pod_pending_resource_pressure`

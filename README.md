@@ -217,6 +217,7 @@ See [docs/mwaa-local-runner.md](docs/mwaa-local-runner.md).
 - [EMR on EKS prerequisites](docs/emr-on-eks-prerequisites.md)
 - [Local developer experience](docs/local-developer-experience.md)
 - [CI and release](docs/ci-and-release.md)
+- [Public release checklist](docs/public-release-checklist.md)
 - [Roadmap](ROADMAP.md)
 - [Support](SUPPORT.md)
 - [Maintainers](MAINTAINERS.md)

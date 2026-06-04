@@ -15,7 +15,7 @@ The demo lab does not host or deploy the production MCP server.
 
 ## Baseline Infrastructure
 
-Slice 2 creates the disposable EMR on EC2 baseline:
+The disposable EMR on EC2 baseline includes:
 
 - VPC and public subnet
 - raw, processed, and EMR logs S3 buckets
@@ -27,7 +27,7 @@ Slice 2 creates the disposable EMR on EC2 baseline:
 
 Use Terraform outputs from `infra/terraform` as the source of truth for cluster and bucket identifiers.
 
-Slice 30 adds the disposable EMR Serverless baseline:
+The disposable EMR Serverless baseline includes:
 
 - EMR Serverless Spark application
 - EMR Serverless job execution role
@@ -35,7 +35,7 @@ Slice 30 adds the disposable EMR Serverless baseline:
 - CloudWatch log group for driver and executor stdout/stderr
 - auto-start and auto-stop settings so no workers remain active after idle timeout
 
-Slice 31 adds EMR on EKS registration for an existing EKS cluster:
+The EMR on EKS setup can register an existing EKS cluster:
 
 - CloudWatch log group for EMR Containers driver, executor, and submitter logs
 - optional `aws_emrcontainers_virtual_cluster` registration for a supplied EKS cluster and namespace
@@ -44,7 +44,8 @@ Slice 31 adds EMR on EKS registration for an existing EKS cluster:
 
 ## Happy Path
 
-Slice 3 adds a known-good Spark job that proves the baseline cluster can run a normal job before failure scenarios are introduced.
+The happy path scenario proves the baseline cluster can run a normal job before
+failure scenarios are introduced.
 
 The happy path flow is:
 

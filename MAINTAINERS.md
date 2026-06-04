@@ -27,3 +27,6 @@ Small fixes can be merged after normal review and passing CI. Changes that alter
 ## Release Stewardship
 
 Changes should update `CHANGELOG.md` when they add scenarios, change Terraform resources, alter validation behavior, or modify cleanup expectations.
+
+Before making the repository public or cutting a documented release, complete
+[docs/public-release-checklist.md](docs/public-release-checklist.md).

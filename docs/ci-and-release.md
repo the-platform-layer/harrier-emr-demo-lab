@@ -25,6 +25,9 @@ with environment-protected AWS credentials only in a sandbox account.
 The demo lab does not publish runtime artifacts. Use GitHub releases only for
 documented milestones or companion releases aligned to Harrier EMR MCP.
 
+Before cutting a release, complete
+[public-release-checklist.md](public-release-checklist.md).
+
 ## Release Workflow
 
 The `Release` workflow runs when a semantic version tag is pushed:

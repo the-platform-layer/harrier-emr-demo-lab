@@ -1,6 +1,8 @@
 # EMR On EKS Prerequisites
 
-Slice 31 can use an existing EKS cluster or create a disposable demo cluster. The demo lab registers one namespace as an EMR on EKS virtual cluster and submits disposable Spark jobs into that namespace.
+The EMR on EKS demo can use an existing EKS cluster or create a disposable demo
+cluster. The demo lab registers one namespace as an EMR on EKS virtual cluster
+and submits disposable Spark jobs into that namespace.
 
 ## Disposable Demo Cluster
 

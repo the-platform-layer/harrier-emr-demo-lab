@@ -17,7 +17,7 @@ Default retention targets:
 - Validation reports: 30 days
 - Demo secrets: delete on destroy
 
-## Slice 2 Defaults
+## Baseline Defaults
 
 Terraform creates:
 
@@ -44,7 +44,7 @@ Default cost controls:
 
 - Resource names are prefixed with `harrier-demo`.
 - Resources use default tags `Project=harrier-demo` and `Environment=demo`.
-- RDS resources are disabled in Slice 2.
+- RDS resources are disabled by default.
 - S3 buckets use lifecycle expiration and `force_destroy_buckets=true` by default.
 - EMR auto-termination is configured with `max_runtime_hours`, default 4 idle hours.
 
