@@ -28,8 +28,7 @@
 
 Harrier EMR Demo Lab creates controlled Amazon EMR incidents and validates that Harrier EMR MCP can diagnose them. It owns the disposable AWS infrastructure, Spark jobs, sample data, scenario runners, expected findings, validation harness, alarms, cleanup, and cost-control docs.
 
-The production MCP server lives in
-[harrier-emr-mcp](https://github.com/the-platform-layer/harrier-emr-mcp) and is
+The production MCP server lives in the `harrier-emr-mcp` repository and is
 documented at
 [docs.harrier.theplatformlayer.com](https://docs.harrier.theplatformlayer.com).
 
@@ -191,9 +190,9 @@ Validation reports are written under `.harrier-demo/validation/` and should not 
 
 This repository contains demo infrastructure, scenario runners, Spark jobs,
 sample data, expected findings, and validation harness code. It does not contain
-the production MCP server. Use
-[harrier-emr-mcp](https://github.com/the-platform-layer/harrier-emr-mcp) for the
-server, deployment endpoint, MCP tool contracts, and DevOps Agent integration.
+the production MCP server. Use the `harrier-emr-mcp` repository and the
+[public Harrier docs](https://docs.harrier.theplatformlayer.com) for the server,
+deployment endpoint, MCP tool contracts, and DevOps Agent integration.
 
 ## MWAA Local Runner
 
