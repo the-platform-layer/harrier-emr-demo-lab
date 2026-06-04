@@ -35,6 +35,13 @@ Sensitive areas include:
 - Destroy resources when validation is complete.
 - Redact account IDs and logs before opening public issues.
 
+## Code Scanning
+
+The CodeQL workflow is checked in, but it only runs when the repository is
+public. GitHub code scanning for private repositories requires GitHub Advanced
+Security; gating the job avoids misleading red checks while the repository is
+still private. When the repository is made public, CodeQL runs automatically on
+pushes, pull requests, and the weekly schedule.
+
 See [docs/cost-and-retention.md](docs/cost-and-retention.md) and
 [docs/cleanup.md](docs/cleanup.md).
-
