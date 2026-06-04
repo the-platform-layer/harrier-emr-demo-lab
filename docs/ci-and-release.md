@@ -25,3 +25,28 @@ with environment-protected AWS credentials only in a sandbox account.
 The demo lab does not publish runtime artifacts. Use GitHub releases only for
 documented milestones or companion releases aligned to Harrier EMR MCP.
 
+## Release Workflow
+
+The `Release` workflow runs when a semantic version tag is pushed:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The workflow:
+
+- runs the static Python test suite
+- creates a GitHub release
+- uses `.github/RELEASE_TEMPLATE.md` for release-note structure
+
+It does not deploy AWS resources, run live scenarios, or publish container
+images.
+
+Release notes should call out any:
+
+- new or changed scenarios
+- Terraform resource changes
+- AWS permission changes
+- cleanup or cost-control changes
+- validation harness behavior changes

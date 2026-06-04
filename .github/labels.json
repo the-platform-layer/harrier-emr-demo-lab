@@ -1,0 +1,87 @@
+[
+  {
+    "name": "bug",
+    "color": "d73a4a",
+    "description": "Incorrect scenario, script, or validation behavior"
+  },
+  {
+    "name": "enhancement",
+    "color": "a2eeef",
+    "description": "New demo-lab capability"
+  },
+  {
+    "name": "docs",
+    "color": "0075ca",
+    "description": "Documentation-only change"
+  },
+  {
+    "name": "security",
+    "color": "b60205",
+    "description": "IAM, credential, or vulnerable configuration work"
+  },
+  {
+    "name": "cost-control",
+    "color": "fbca04",
+    "description": "Budget, retention, cleanup, or destroy behavior"
+  },
+  {
+    "name": "scenario",
+    "color": "c5def5",
+    "description": "Scenario config or Spark job work"
+  },
+  {
+    "name": "runtime/ec2",
+    "color": "5319e7",
+    "description": "EMR on EC2 scenario support"
+  },
+  {
+    "name": "runtime/serverless",
+    "color": "5319e7",
+    "description": "EMR Serverless scenario support"
+  },
+  {
+    "name": "runtime/eks",
+    "color": "5319e7",
+    "description": "EMR on EKS scenario support"
+  },
+  {
+    "name": "validation",
+    "color": "0e8a16",
+    "description": "Harness and expected findings"
+  },
+  {
+    "name": "needs-triage",
+    "color": "ededed",
+    "description": "Needs maintainer review before prioritization"
+  },
+  {
+    "name": "dependencies",
+    "color": "0366d6",
+    "description": "Automated dependency update"
+  },
+  {
+    "name": "github-actions",
+    "color": "0366d6",
+    "description": "GitHub Actions dependency or workflow update"
+  },
+  {
+    "name": "docker",
+    "color": "0db7ed",
+    "description": "Dockerfile or container dependency"
+  },
+  {
+    "name": "terraform",
+    "color": "844fba",
+    "description": "Terraform provider, module, or infrastructure dependency"
+  },
+  {
+    "name": "good first issue",
+    "color": "7057ff",
+    "description": "Scoped contributor-friendly task"
+  },
+  {
+    "name": "help wanted",
+    "color": "008672",
+    "description": "Maintainer-approved external contribution"
+  }
+]
