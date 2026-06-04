@@ -2,11 +2,12 @@ PYTHON ?= python3
 SCENARIO ?= s3_access_denied
 RUNTIME ?= emr_ec2
 
-.PHONY: help test deploy destroy run-scenario validate compare-oom smoke clean
+.PHONY: help test hygiene deploy destroy run-scenario validate compare-oom smoke clean
 
 help:
 	@printf "Harrier EMR Demo Lab commands\n\n"
 	@printf "  make test          Run static/unit tests\n"
+	@printf "  make hygiene       Check for tracked local/generated files\n"
 	@printf "  make deploy        Deploy disposable AWS demo infrastructure\n"
 	@printf "  make destroy       Destroy disposable AWS demo infrastructure\n"
 	@printf "  make run-scenario  Run SCENARIO=s3_access_denied RUNTIME=emr_ec2\n"
@@ -17,6 +18,9 @@ help:
 
 test:
 	$(PYTHON) -m pytest -q
+
+hygiene:
+	./scripts/check-repo-hygiene.sh
 
 deploy:
 	./scripts/deploy.sh

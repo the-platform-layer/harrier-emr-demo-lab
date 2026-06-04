@@ -21,6 +21,7 @@ CODEX_TASKS.md
 .codex/
 .harrier-demo/
 .harrier-local/
+comparison-output/
 sample-data/generated/*
 sample-data/large/*
 !sample-data/generated/.gitkeep

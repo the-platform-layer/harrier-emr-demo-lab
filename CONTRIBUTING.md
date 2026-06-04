@@ -20,6 +20,7 @@ validate.
 
 ```bash
 make test
+make hygiene
 make smoke
 ```
 
