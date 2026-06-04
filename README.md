@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <img src="docs/assets/harrier-demo-lab.png" alt="Harrier EMR Demo Lab" width="620">
+  <img src="docs/assets/harrier-demo-lab.png" alt="Harrier EMR Demo Lab" width="100%">
   <br>
 </h1>
 
