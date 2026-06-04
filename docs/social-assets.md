@@ -6,6 +6,7 @@ Harrier EMR Demo Lab keeps deterministic social assets in the repository so GitH
 
 | Asset | Path | Use |
 | --- | --- | --- |
+| Demo lab README hero | `docs/assets/harrier-demo-lab.png` | Top image for the GitHub README |
 | Demo lab GitHub social preview | `docs/assets/social-preview.png` | Upload in GitHub repository settings |
 | Demo lab favicon | `docs/assets/favicon.png` | Browser tab icon asset for future docs or website hosting |
 | Editable social preview | `docs/assets/social-preview.svg` | Source for social preview updates |
