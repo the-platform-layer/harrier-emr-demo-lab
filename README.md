@@ -11,6 +11,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
   <a href=".github/workflows/ci.yml"><img src="https://img.shields.io/badge/ci-github%20actions-2563eb.svg" alt="CI"></a>
+  <a href="https://github.com/the-platform-layer/harrier-emr-demo-lab/releases"><img src="https://img.shields.io/github/v/release/the-platform-layer/harrier-emr-demo-lab?include_prereleases&label=release" alt="Release"></a>
   <a href="docs/cost-and-retention.md"><img src="https://img.shields.io/badge/AWS-cost%20warning-b91c1c.svg" alt="AWS cost warning"></a>
   <a href="docs/scenarios.md"><img src="https://img.shields.io/badge/scenarios-EC2%20%7C%20Serverless%20%7C%20EKS-0f766e.svg" alt="Scenarios"></a>
 </p>
