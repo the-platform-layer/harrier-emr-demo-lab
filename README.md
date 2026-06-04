@@ -17,6 +17,7 @@
 
 <p align="center">
   <a href="#safety-first">Safety First</a> |
+  <a href="#before-you-deploy">Before You Deploy</a> |
   <a href="#quick-start">Quick Start</a> |
   <a href="#scenario-catalog">Scenarios</a> |
   <a href="#validation-flow">Validation</a> |
@@ -27,17 +28,35 @@
 
 Harrier EMR Demo Lab creates controlled Amazon EMR incidents and validates that Harrier EMR MCP can diagnose them. It owns the disposable AWS infrastructure, Spark jobs, sample data, scenario runners, expected findings, validation harness, alarms, cleanup, and cost-control docs.
 
-The production MCP server is documented at
+The production MCP server lives in
+[harrier-emr-mcp](https://github.com/the-platform-layer/harrier-emr-mcp) and is
+documented at
 [docs.harrier.theplatformlayer.com](https://docs.harrier.theplatformlayer.com).
 
 ## Safety First
 
-This repository can create real AWS resources and real AWS cost. Use a sandbox account.
+This repository can create real AWS resources, intentionally run failed Spark
+jobs, and produce real AWS cost. Use a sandbox account, not a production
+account.
 
 - Review [docs/cost-and-retention.md](docs/cost-and-retention.md) before deploying.
 - Review [docs/cleanup.md](docs/cleanup.md) before running long scenario batches.
 - Keep `.harrier-demo/`, Terraform state, generated data, and credentials out of git.
 - Destroy resources when validation is complete.
+
+## Before You Deploy
+
+Prepare these before running live scenarios:
+
+- AWS CLI credentials for a sandbox account.
+- Terraform available locally.
+- An AWS region where the EMR runtimes you want to test are available.
+- A deployed Harrier MCP endpoint for validation.
+- Budget or cost alarm coverage for the sandbox account.
+- Permission to create and destroy demo infrastructure.
+
+Start with one scenario, validate it, and destroy the lab before running larger
+batches.
 
 ## Quick Start
 
@@ -167,6 +186,14 @@ flowchart LR
 ```
 
 Validation reports are written under `.harrier-demo/validation/` and should not be committed.
+
+## Repository Boundary
+
+This repository contains demo infrastructure, scenario runners, Spark jobs,
+sample data, expected findings, and validation harness code. It does not contain
+the production MCP server. Use
+[harrier-emr-mcp](https://github.com/the-platform-layer/harrier-emr-mcp) for the
+server, deployment endpoint, MCP tool contracts, and DevOps Agent integration.
 
 ## MWAA Local Runner
 
