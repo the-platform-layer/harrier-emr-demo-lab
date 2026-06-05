@@ -9,7 +9,7 @@ Harrier EMR Demo Lab keeps deterministic social assets in the repository so GitH
 | Demo lab README hero | `docs/assets/harrier-demo-lab.png` | Top image for the GitHub README |
 | Demo lab GitHub social preview | `docs/assets/social-preview.png` | Upload in GitHub repository settings |
 | Demo lab favicon | `docs/assets/favicon.png` | Browser tab icon asset for future docs or website hosting |
-| Editable social preview | `docs/assets/social-preview.svg` | Source for social preview updates |
+| Editable social preview template | `docs/assets/social-preview.svg` | Legacy template; `docs/assets/social-preview.png` is the current canonical GitHub upload asset |
 
 ## GitHub Upload Steps
 
@@ -29,7 +29,9 @@ GitHub social previews should be `1280x640` PNG images under 1 MB when possible.
 
 ## Regenerate PNG
 
-Render the PNG from the editable SVG:
+The GitHub social preview is currently a generated PNG asset and should not be
+overwritten from the legacy SVG template unless the design is being replaced.
+If you intentionally return to the template, render it with:
 
 ```bash
 magick docs/assets/social-preview.svg docs/assets/social-preview.png
