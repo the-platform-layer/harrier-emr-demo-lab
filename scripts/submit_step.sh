@@ -99,8 +99,8 @@ case "$scenario" in
   executor_oom)
     expected_outcome="failed"
     executor_instances="${EXECUTOR_INSTANCES:-2}"
-    executor_memory="${EXECUTOR_MEMORY:-1g}"
-    executor_memory_overhead="${EXECUTOR_MEMORY_OVERHEAD:-384}"
+    executor_memory="${EXECUTOR_MEMORY:-4g}"
+    executor_memory_overhead="${EXECUTOR_MEMORY_OVERHEAD:-1024}"
     executor_cores="${EXECUTOR_CORES:-1}"
     partitions="${PARTITIONS:-4}"
     allocation_mb="${EXECUTOR_OOM_ALLOCATION_MB:-768}"
